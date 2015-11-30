@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Microsoft-Maker-Serial</id>
+        <version>1.2.0</version>
+        <title>Native Windows serial transport layer written to the Arduino Stream interface for Windows 10 and Windows 10 IoT core</title>
+        <authors>Microsoft</authors>
+        <licenseUrl>https://github.com/ms-iot/serial-wiring/blob/master/license.txt</licenseUrl>
+        <projectUrl>https://github.com/ms-iot/serial-wiring</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Microsoft Maker Serial is an open-source Windows Runtime Component library which allows Makers to send serialized data via a USB, Ethernet, WiFi, Bluetooth or Bluetooth Low Energy connection! It is intended for Windows Runtime (WinRT) Developers who want to harness the power of the Arduino Stream interface using the Universal Windows Platform. Developers who include this component in their projects will automatically have access to its features in any of the WinRT languages (C++/CX, C# and JavaScript).</description>
+    </metadata>
+    <files>
+        <file src="..\Microsoft.Maker.Serial.win10\ARM\Release\Microsoft.Maker.Serial\Microsoft.Maker.Serial.winmd" target="lib\uap10.0\Microsoft.Maker.Serial.winmd" />
+
+        <file src="..\Microsoft.Maker.Serial.win10\ARM\Release\Microsoft.Maker.Serial\Microsoft.Maker.Serial.dll" target="runtimes\win10-arm\native\Microsoft.Maker.Serial.dll" />
+        <file src="..\Microsoft.Maker.Serial.win10\x64\Release\Microsoft.Maker.Serial\Microsoft.Maker.Serial.dll" target="runtimes\win10-x64\native\Microsoft.Maker.Serial.dll" />
+        <file src="..\Microsoft.Maker.Serial.win10\Release\Microsoft.Maker.Serial\Microsoft.Maker.Serial.dll" target="runtimes\win10-x86\native\Microsoft.Maker.Serial.dll" />
+    </files>
+</package>
