@@ -101,6 +101,58 @@ public:
 
     virtual
     uint16_t
+    print(
+          uint8_t c_
+         );
+
+    virtual
+    uint16_t
+    print(
+          int32_t value_
+         );
+
+    virtual
+    uint16_t
+    print(
+          int32_t value_,
+          Radix base_
+         );
+
+    virtual
+    uint16_t
+    print(
+          uint32_t value_
+         );
+
+    virtual
+    uint16_t
+    print(
+          uint32_t value_,
+          Radix base_
+         );
+
+    virtual
+    uint16_t
+    print(
+          double value_
+         );
+
+    virtual
+    uint16_t
+    print(
+          double value_,
+          int16_t decimal_place_
+         );
+
+    [Windows::Foundation::Metadata::DefaultOverload]
+    virtual
+    uint16_t
+    print(
+        const Platform::Array<uint8_t> ^buffer_
+        );
+
+    virtual
+    uint16_t
     read(
         void
         );
@@ -112,9 +164,16 @@ public:
         );
 
     virtual
-    uint32_t
+    uint16_t
     write(
         uint8_t c_
+        );
+
+    [Windows::Foundation::Metadata::DefaultOverload]
+    virtual
+    uint16_t
+    write(
+        const Platform::Array<uint8_t> ^buffer_
         );
 
 private:
