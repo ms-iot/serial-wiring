@@ -72,6 +72,16 @@ public:
         void
         );
 
+    [Windows::Foundation::Metadata::DefaultOverload]
+    inline
+    void
+    begin(
+        uint32_t baud_
+        )
+    {
+        begin( baud_, SerialConfig::SERIAL_8N1 );
+    }
+
     virtual
     void
     begin(

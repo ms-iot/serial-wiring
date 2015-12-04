@@ -63,6 +63,16 @@ public:
         void
         );
 
+    [Windows::Foundation::Metadata::DefaultOverload]
+    inline
+    void
+    begin(
+        void
+        )
+    {
+        begin( 0, SerialConfig::SERIAL_8N1 );
+    }
+
     virtual
     void
     begin(
