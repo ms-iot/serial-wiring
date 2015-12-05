@@ -64,7 +64,8 @@ public:
         void
         )
     {
-        begin( 0, SerialConfig::SERIAL_8N1 );
+        //baud rate and serial configuration are unnecessary for network connections as we are not using asyncronous TTL
+        begin( NULL, SerialConfig::NONE );
     }
 
     virtual

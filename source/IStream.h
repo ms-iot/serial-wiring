@@ -31,6 +31,7 @@ namespace Maker {
 namespace Serial {
 
 public enum class SerialConfig {
+    NONE,
     SERIAL_5E1,
     SERIAL_5E2,
     SERIAL_5N1,
@@ -54,8 +55,7 @@ public enum class SerialConfig {
     SERIAL_8N1,
     SERIAL_8N2,
     SERIAL_8O1,
-    SERIAL_8O2,
-    SERIAL_CONFIG_COUNT,
+    SERIAL_8O2
 };
 
 public delegate void IStreamConnectionCallback();

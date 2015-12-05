@@ -79,6 +79,7 @@ public:
         uint32_t baud_
         )
     {
+        //default Serial configuration for Arduino Devices and similar microcontrollers matches the 8N1 profile
         begin( baud_, SerialConfig::SERIAL_8N1 );
     }
 
