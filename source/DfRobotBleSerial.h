@@ -64,6 +64,17 @@ public:
         void
         );
 
+    [Windows::Foundation::Metadata::DefaultOverload]
+    inline
+    void
+    begin(
+        void
+        )
+    {
+        //baud rate and serial configuration are unnecessary for BLE connections as we are not using asyncronous TTL
+        begin( NULL, SerialConfig::NONE );
+    }
+
     virtual
     void
     begin(

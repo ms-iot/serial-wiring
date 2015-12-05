@@ -72,6 +72,17 @@ public:
         void
         );
 
+    [Windows::Foundation::Metadata::DefaultOverload]
+    inline
+    void
+    begin(
+        uint32_t baud_
+        )
+    {
+        //default Serial configuration for Arduino Devices and similar microcontrollers matches the 8N1 profile
+        begin( baud_, SerialConfig::SERIAL_8N1 );
+    }
+
     virtual
     void
     begin(
