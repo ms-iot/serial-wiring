@@ -208,21 +208,21 @@ UsbSerial::flush(
     void
     )
 {
-    if( !connectionReady() )
+    if ( !connectionReady() )
     {
         return;
     }
 
-    auto async_operation_ = _tx->StoreAsync();
-    create_task( async_operation_ )
-        .then( [ this, async_operation_ ]( task<unsigned int> task_ )
+    auto async_operation = _tx->StoreAsync();
+    create_task( async_operation )
+    .then( [ this, async_operation ]( task<unsigned int> task_ )
     {
         try
         {
-            task_.get();
+            task_.wait();
 
             //detect disconnection
-            if( async_operation_->Status == Windows::Foundation::AsyncStatus::Error )
+            if ( async_operation->Status == Windows::Foundation::AsyncStatus::Error )
             {
                 throw ref new Platform::Exception( E_UNEXPECTED );
             }
