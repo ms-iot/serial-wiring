@@ -30,6 +30,13 @@ namespace Microsoft {
 namespace Maker {
 namespace Serial {
 
+public enum class Radix {
+    BIN = 2,
+    OCT = 8,
+    DEC = 10,
+    HEX = 16,
+};
+
 public enum class SerialConfig {
     NONE,
     SERIAL_5E1,
@@ -120,9 +127,94 @@ public interface struct IStream
     ///Locks this instance of the object, enabling thread safety
     ///<para>when explicitly invoking this method, unlock() must be called when the lock is no longer needed.</para>
     ///</summary>
+    virtual
     void
     lock(
         void
+        ) = 0;
+
+    ///<summary>
+    ///Places one character into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    virtual
+    uint16_t
+    print(
+          uint8_t c_
+         ) = 0;
+
+    ///<summary>
+    ///Places the serialized integer value in the decimal (10) base into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    virtual
+    uint16_t
+    print(
+          int32_t value_
+         ) = 0;
+
+    ///<summary>
+    ///Places the serialized integer value in the given base into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    virtual
+    uint16_t
+    print(
+          int32_t value_,
+          Radix base_
+         ) = 0;
+
+    ///<summary>
+    ///Places the serialized unsigned integer value in the decimal (10) base into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    virtual
+    uint16_t
+    print(
+          uint32_t value_
+         ) = 0;
+
+    ///<summary>
+    ///Places the serialized unsigned integer value in the given base into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    virtual
+    uint16_t
+    print(
+          uint32_t value_,
+          Radix base_
+         ) = 0;
+
+    ///<summary>
+    ///Places the serialized double value to two decimal positions into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    virtual
+    uint16_t
+    print(
+          double value_
+         ) = 0;
+
+    ///<summary>
+    ///Places the serialized double value to the given precision into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    virtual
+    uint16_t
+    print(
+          double value_,
+          int16_t decimal_place_
+         ) = 0;
+
+    ///<summary>
+    ///Places multiple characters into the outbound queue.
+    ///Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    [Windows::Foundation::Metadata::DefaultOverload]
+    virtual
+    uint16_t
+    print(
+        const Platform::Array<uint8_t> ^buffer_
         ) = 0;
 
     ///<summary>
@@ -135,12 +227,22 @@ public interface struct IStream
         ) = 0;
 
     ///<summary>
-    ///Places one byte into the outbound queue. flush() must be called on this object before the data will be sent.
+    ///Places one byte into the outbound queue. Data will not be sent until `flush()` is called explicitly.
     ///</summary>
     virtual
-    uint32_t
+    uint16_t
     write(
         uint8_t c_
+        ) = 0;
+
+    ///<summary>
+    ///Places multiple bytes into the outbound queue. Data will not be sent until `flush()` is called explicitly.
+    ///</summary>
+    [Windows::Foundation::Metadata::DefaultOverload]
+    virtual
+    uint16_t
+    write(
+		const Platform::Array<uint8_t> ^buffer_
         ) = 0;
 
     ///<summary>
