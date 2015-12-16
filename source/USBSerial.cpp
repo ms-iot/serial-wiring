@@ -122,9 +122,24 @@ UsbSerial::available(
     if (!connectionReady()) {
         return 0;
     }
-    else {
-        return _rx->UnconsumedBufferLength;
+    
+	if (_rx->UnconsumedBufferLength) {
+		if (_rx->UnconsumedBufferLength > 0xFFFF) { return 0xFFFF; }
+		return _rx->UnconsumedBufferLength;
     }
+	else if (_current_load_operation->Status != Windows::Foundation::AsyncStatus::Started) {
+		// Attempt to detect disconnection
+		if (_current_load_operation->Status == Windows::Foundation::AsyncStatus::Error)
+		{
+			_connection_ready = false;
+			ConnectionLost(L"A fatal error has occurred in UsbSerial::read() and your connection has been lost.");
+			return 0;
+		}
+
+		_current_load_operation = _rx->LoadAsync(MAX_READ_SIZE);
+	}
+
+	return 0;
 }
 
 void
@@ -381,23 +396,8 @@ UsbSerial::read(
 {
     uint16_t c = static_cast<uint16_t>(-1);
 
-    if ( !connectionReady() ) {
-        return c;
-    }
-
     if ( available() ) {
         c = _rx->ReadByte();
-    }
-    else if ( _current_load_operation->Status != Windows::Foundation::AsyncStatus::Started ) {
-        // Attempt to detect disconnection
-        if (_current_load_operation->Status == Windows::Foundation::AsyncStatus::Error)
-        {
-            _connection_ready = false;
-            ConnectionLost( L"A fatal error has occurred in UsbSerial::read() and your connection has been lost." );
-            return -1;
-        }
-
-        _current_load_operation = _rx->LoadAsync( MAX_READ_SIZE );
     }
 
     return c;

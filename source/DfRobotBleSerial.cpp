@@ -104,7 +104,9 @@ DfRobotBleSerial::available(
     }
     else {
         std::lock_guard<std::mutex> lock(_q_lock);
-        return !_rx.empty();
+		if (_rx.size() > 0xFFFF) { return 0xFFFF; }
+		return _rx.size();
+
     }
 }
 
