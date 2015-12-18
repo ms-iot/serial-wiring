@@ -192,13 +192,13 @@ DfRobotBleSerial::flush(
     void
     )
 {
-    if( !connectionReady() )
+    if ( !connectionReady() )
     {
         return;
     }
 
     create_task(_gatt_characteristic->WriteValueAsync(_tx->DetachBuffer(), GattWriteOption::WriteWithResponse))
-        .then([this](GattCommunicationStatus status_)
+    .then([this](GattCommunicationStatus status_)
     {
         switch (status_) {
         case GattCommunicationStatus::Success:

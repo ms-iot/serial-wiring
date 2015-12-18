@@ -194,26 +194,26 @@ BluetoothSerial::flush(
     void
     )
 {
-    if( !connectionReady() )
+    if ( !connectionReady() )
     {
         return;
     }
 
-    auto async_operation_ = _tx->StoreAsync();
-    create_task( _tx->StoreAsync() )
-        .then( [ this, async_operation_ ]( unsigned int value_ )
+    auto async_operation = _tx->StoreAsync();
+    create_task( async_operation )
+    .then( [ this, async_operation ]( unsigned int value_ )
     {
         UNREFERENCED_PARAMETER( value_ );
 
         //detect disconnection
-        if( async_operation_->Status == Windows::Foundation::AsyncStatus::Error )
+        if ( async_operation->Status == Windows::Foundation::AsyncStatus::Error )
         {
             throw ref new Platform::Exception( E_UNEXPECTED );
         }
 
         return create_task( _tx->FlushAsync() );
     } )
-        .then( [ this ]( task<bool> task_ )
+    .then( [ this ]( task<bool> task_ )
     {
         try
         {
