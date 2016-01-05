@@ -38,7 +38,7 @@ public:
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
 
-    [Windows::Foundation::Metadata::DefaultOverload]
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
@@ -64,7 +64,7 @@ public:
         void
         );
 
-    [Windows::Foundation::Metadata::DefaultOverload]
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     inline
     void
     begin(
@@ -144,6 +144,7 @@ public:
           double value_
          );
 
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     print(
@@ -151,7 +152,7 @@ public:
           int16_t decimal_place_
          );
 
-    [Windows::Foundation::Metadata::DefaultOverload]
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     print(
@@ -176,7 +177,7 @@ public:
         uint8_t c_
         );
 
-    [Windows::Foundation::Metadata::DefaultOverload]
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     write(
