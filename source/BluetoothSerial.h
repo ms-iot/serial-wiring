@@ -37,7 +37,6 @@ public:
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
 
-    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
@@ -48,6 +47,7 @@ public:
     ///<summary>
     ///A constructor which accepts a DeviceInformation object to explicitly specify which device to connect to.
     ///</summary>
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     BluetoothSerial(
         Windows::Devices::Enumeration::DeviceInformation ^device_
         );

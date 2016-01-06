@@ -37,10 +37,10 @@ public:
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
 
-    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     ///<summary>
     ///A constructor which accepts a device HostName (web address or IP) and port to connect to.
     ///</summary>
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     NetworkSerial(
         Windows::Networking::HostName ^host_,
         uint16_t port_
