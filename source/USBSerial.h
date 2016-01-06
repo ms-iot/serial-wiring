@@ -38,7 +38,6 @@ public:
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
 
-    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     ///<summary>
     ///A constructor which accepts a string corresponding to a device VID to connect to.
     ///</summary>
@@ -57,6 +56,7 @@ public:
     ///<summary>
     ///A constructor which accepts a DeviceInformation object to explicitly specify which device to connect to.
     ///</summary>
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     UsbSerial(
         Windows::Devices::Enumeration::DeviceInformation ^device_
         );
