@@ -37,7 +37,7 @@ public:
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
 
-    [Windows::Foundation::Metadata::DefaultOverload]
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
@@ -62,6 +62,17 @@ public:
     available(
         void
         );
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    inline
+    void
+    begin(
+        void
+        )
+    {
+        //baud rate and serial configuration are unnecessary for Bluetooth connections as we are not using asyncronous TTL
+        begin( NULL, SerialConfig::NONE );
+    }
 
     virtual
     void
@@ -96,6 +107,59 @@ public:
 
     virtual
     uint16_t
+    print(
+          uint8_t c_
+         );
+
+    virtual
+    uint16_t
+    print(
+          int32_t value_
+         );
+
+    virtual
+    uint16_t
+    print(
+          int32_t value_,
+          Radix base_
+         );
+
+    virtual
+    uint16_t
+    print(
+          uint32_t value_
+         );
+
+    virtual
+    uint16_t
+    print(
+          uint32_t value_,
+          Radix base_
+         );
+
+    virtual
+    uint16_t
+    print(
+          double value_
+         );
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual
+    uint16_t
+    print(
+          double value_,
+          int16_t decimal_place_
+         );
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual
+    uint16_t
+    print(
+        const Platform::Array<uint8_t> ^buffer_
+        );
+
+    virtual
+    uint16_t
     read(
         void
         );
@@ -107,9 +171,16 @@ public:
         );
 
     virtual
-    uint32_t
+    uint16_t
     write(
         uint8_t c_
+        );
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual
+    uint16_t
+    write(
+        const Platform::Array<uint8_t> ^buffer_
         );
 
     ///<summary>

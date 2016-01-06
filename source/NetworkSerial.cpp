@@ -24,7 +24,8 @@ THE SOFTWARE.
 
 #include "pch.h"
 #include "NetworkSerial.h"
-#include <thread>
+
+#include <bitset>
 
 using namespace Concurrency;
 using namespace Windows::Devices::Bluetooth::Rfcomm;
@@ -78,13 +79,28 @@ NetworkSerial::available(
     void
     )
 {
-    // Check to see if connection is ready
-    if( !connectionReady() ) {
-        return 0;
-    }
-    else {
-        return _rx->UnconsumedBufferLength;
-    }
+	// Check to see if connection is ready
+	if ( !connectionReady() ) {
+		return 0;
+	}
+
+	if (_rx->UnconsumedBufferLength) {
+		if (_rx->UnconsumedBufferLength > 0xFFFF) { return 0xFFFF; }
+		return _rx->UnconsumedBufferLength;
+	}
+	else if (_current_load_operation->Status != Windows::Foundation::AsyncStatus::Started) {
+		// Attempt to detect disconnection
+		if (_current_load_operation->Status == Windows::Foundation::AsyncStatus::Error)
+		{
+			_connection_ready = false;
+			ConnectionLost(L"A fatal error has occurred in UsbSerial::read() and your connection has been lost.");
+			return 0;
+		}
+
+		_current_load_operation = _rx->LoadAsync(MAX_READ_SIZE);
+	}
+
+	return 0;
 }
 
 /// \details Immediately discards the incoming parameters, because they are used for standard serial connections and will have no bearing on a network connection.
@@ -150,26 +166,26 @@ NetworkSerial::flush(
     void
     )
 {
-    if( !connectionReady() )
+    if ( !connectionReady() )
     {
         return;
     }
 
-    auto async_operation_ = _tx->StoreAsync();
-    create_task( async_operation_ )
-        .then( [ this, async_operation_ ]( unsigned int value_ )
+    auto async_operation = _tx->StoreAsync();
+    create_task( async_operation )
+    .then( [ this, async_operation ]( unsigned int value_ )
     {
         UNREFERENCED_PARAMETER( value_ );
 
         //detect disconnection
-        if( async_operation_->Status == Windows::Foundation::AsyncStatus::Error )
+        if ( async_operation->Status == Windows::Foundation::AsyncStatus::Error )
         {
             throw ref new Platform::Exception( E_UNEXPECTED );
         }
 
         return create_task( _tx->FlushAsync() );
     } )
-        .then( [ this ]( task<bool> task_ )
+    .then( [ this ]( task<bool> task_ )
     {
         try
         {
@@ -192,32 +208,134 @@ NetworkSerial::lock(
 }
 
 uint16_t
+NetworkSerial::print(
+    uint8_t c_
+    )
+{
+    return write(c_);
+}
+
+uint16_t
+NetworkSerial::print(
+    int32_t value_
+    )
+{
+    return print(value_, Radix::DEC);
+}
+
+uint16_t
+NetworkSerial::print(
+    int32_t value_,
+    Radix base_
+    )
+{
+    constexpr int bit_size = (sizeof(int) * 8);
+    std::bitset<bit_size> bits(value_);
+    char text_value[bit_size + 1];
+
+    switch (base_) {
+    case Radix::BIN:
+        sprintf_s(text_value, "%s", bits.to_string().c_str());
+        break;
+    case Radix::DEC:
+        sprintf_s(text_value, "%i", value_);
+        break;
+    case Radix::HEX:
+        sprintf_s(text_value, "%x", value_);
+        break;
+    case Radix::OCT:
+        sprintf_s(text_value, "%o", value_);
+        break;
+    default:
+        return static_cast<uint16_t>(-1);
+    }
+
+    return write(Platform::ArrayReference<uint8_t>(reinterpret_cast<uint8_t *>(const_cast<char *>(text_value)), strnlen(text_value, bit_size + 1)));
+}
+
+uint16_t
+NetworkSerial::print(
+    uint32_t value_
+    )
+{
+    return print(value_, Radix::DEC);
+}
+
+uint16_t
+NetworkSerial::print(
+    uint32_t value_,
+    Radix base_
+    )
+{
+    constexpr int bit_size = (sizeof(unsigned int) * 8);
+    std::bitset<bit_size> bits(value_);
+    char text_value[bit_size + 1];
+
+    switch (base_) {
+    case Radix::BIN:
+        sprintf_s(text_value, "%s", bits.to_string().c_str());
+        break;
+    case Radix::DEC:
+        sprintf_s(text_value, "%u", value_);
+        break;
+    case Radix::HEX:
+        sprintf_s(text_value, "%x", value_);
+        break;
+    case Radix::OCT:
+        sprintf_s(text_value, "%o", value_);
+        break;
+    default:
+        return static_cast<uint16_t>(-1);
+    }
+
+    return write(Platform::ArrayReference<uint8_t>(reinterpret_cast<uint8_t *>(const_cast<char *>(text_value)), strnlen(text_value, bit_size + 1)));
+}
+
+uint16_t
+NetworkSerial::print(
+    double value_
+    )
+{
+    return print(value_, 2);
+}
+
+uint16_t
+NetworkSerial::print(
+    double value_,
+    int16_t decimal_places_
+    )
+{
+    constexpr int max_double_size = (sizeof(double) * 8);
+    constexpr int max_int_size = (sizeof(int16_t) * 8);
+    char format_string[max_int_size + 5];
+    char text_value[max_double_size + 1];
+
+    sprintf_s(format_string, "%%.%ilf", decimal_places_);
+    sprintf_s(text_value, format_string, value_);
+
+    return write(Platform::ArrayReference<uint8_t>(reinterpret_cast<uint8_t *>(const_cast<char *>(text_value)), strnlen(text_value, max_double_size + 1)));
+}
+
+uint16_t
+NetworkSerial::print(
+    const Platform::Array<uint8_t> ^buffer_
+    )
+{
+    return write(buffer_);
+}
+
+uint16_t
 NetworkSerial::read(
     void
     )
 {
-    uint16_t c = static_cast<uint16_t>( -1 );
+	uint16_t c = static_cast<uint16_t>( -1 );
 
-    if( !connectionReady() ) {
-        return c;
-    }
+	if ( available() ) {
+		c = _rx->ReadByte();
+	}
 
-    if( available() ) {
-        c = _rx->ReadByte();
-    }
-    else if( _current_load_operation->Status != Windows::Foundation::AsyncStatus::Started ) {
-        // Attempt to detect disconnection
-        if( _current_load_operation->Status == Windows::Foundation::AsyncStatus::Error )
-        {
-            _connection_ready = false;
-            ConnectionLost( L"A fatal error has occurred in NetworkSerial::read() and your connection has been lost." );
-            return -1;
-        }
-
-        _current_load_operation = _rx->LoadAsync( MAX_READ_SIZE );
-    }
-
-    return c;
+	return c;
 }
 
 void
@@ -228,7 +346,7 @@ NetworkSerial::unlock(
     _network_lock.unlock();
 }
 
-uint32_t
+uint16_t
 NetworkSerial::write(
     uint8_t c_
     )
@@ -238,6 +356,18 @@ NetworkSerial::write(
 
     _tx->WriteByte( c_ );
     return 1;
+}
+
+uint16_t
+NetworkSerial::write(
+    const Platform::Array<uint8_t> ^buffer_
+    )
+{
+    // Check to see if connection is ready
+    if (!connectionReady()) { return 0; }
+
+    _tx->WriteBytes(buffer_);
+    return buffer_->Length;
 }
 
 //******************************************************************************
