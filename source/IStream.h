@@ -199,6 +199,7 @@ public interface struct IStream
     ///Places the serialized double value to the given precision into the outbound queue.
     ///Data will not be sent until `flush()` is called explicitly.
     ///</summary>
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     print(
@@ -210,7 +211,7 @@ public interface struct IStream
     ///Places multiple characters into the outbound queue.
     ///Data will not be sent until `flush()` is called explicitly.
     ///</summary>
-    [Windows::Foundation::Metadata::DefaultOverload]
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     print(
@@ -238,7 +239,7 @@ public interface struct IStream
     ///<summary>
     ///Places multiple bytes into the outbound queue. Data will not be sent until `flush()` is called explicitly.
     ///</summary>
-    [Windows::Foundation::Metadata::DefaultOverload]
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     write(
