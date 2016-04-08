@@ -23,7 +23,7 @@
 */
 
 #include "pch.h"
-#include "DfRobotBleSerial.h"
+#include "CurieBleSerial.h"
 
 #include <bitset>
 
@@ -39,34 +39,38 @@ using namespace Microsoft::Maker::Serial;
 //* Constructors
 //******************************************************************************
 
-DfRobotBleSerial::DfRobotBleSerial(
+CurieBleSerial::CurieBleSerial(
     Platform::String ^device_name_
     ) :
-    DFROBOT_BLE_SERVICE_UUID(uuid_t{ 0xdfb0, 0x0, 0x1000, { 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb } }),
-    DFROBOT_BLE_SERIAL_CHARACTERISTIC_UUID(uuid_t{ 0xdfb1, 0x0, 0x1000, { 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb } }),
+    CURIE_BLE_SERVICE_UUID(uuid_t{ 0x6E400001, 0xB5A3, 0xF393, { 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }),
+    CURIE_BLE_SERIAL_RX_CHARACTERISTIC_UUID(uuid_t{ 0x6E400002, 0xB5A3, 0xF393, { 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }),
+    CURIE_BLE_SERIAL_TX_CHARACTERISTIC_UUID(uuid_t{ 0x6E400003, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }),
     _connection_ready(ATOMIC_VAR_INIT(false)),
-    _dfrobot_lock(_mutex, std::defer_lock),
+    _curie_lock(_mutex, std::defer_lock),
     _device(nullptr),
     _device_collection(nullptr),
     _device_name(device_name_),
-    _gatt_characteristic(nullptr),
+    _gatt_rx_characteristic(nullptr),
+    _gatt_tx_characteristic(nullptr),
     _gatt_device(nullptr),
     _gatt_service(nullptr),
     _tx(nullptr)
 {
 }
 
-DfRobotBleSerial::DfRobotBleSerial(
+CurieBleSerial::CurieBleSerial(
     DeviceInformation ^device_
     ) :
-    DFROBOT_BLE_SERVICE_UUID(uuid_t{ 0xdfb0, 0x0, 0x1000, { 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb } }),
-    DFROBOT_BLE_SERIAL_CHARACTERISTIC_UUID(uuid_t{ 0xdfb1, 0x0, 0x1000, { 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb } }),
+    CURIE_BLE_SERVICE_UUID(uuid_t{ 0x6E400001, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }),
+    CURIE_BLE_SERIAL_RX_CHARACTERISTIC_UUID(uuid_t{ 0x6E400002, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }),
+    CURIE_BLE_SERIAL_TX_CHARACTERISTIC_UUID(uuid_t{ 0x6E400003, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }),
     _connection_ready(ATOMIC_VAR_INIT(false)),
-    _dfrobot_lock(_mutex, std::defer_lock),
+    _curie_lock(_mutex, std::defer_lock),
     _device(device_),
     _device_name(nullptr),
     _device_collection(nullptr),
-    _gatt_characteristic(nullptr),
+    _gatt_rx_characteristic(nullptr),
+    _gatt_tx_characteristic(nullptr),
     _gatt_device(nullptr),
     _gatt_service(nullptr),
     _tx(nullptr)
@@ -77,14 +81,14 @@ DfRobotBleSerial::DfRobotBleSerial(
 //* Destructors
 //******************************************************************************
 
-DfRobotBleSerial::~DfRobotBleSerial(
+CurieBleSerial::~CurieBleSerial(
     void
     )
 {
     //we will fire the ConnectionLost event in the case that this object is unexpectedly destructed while the connection is established.
     if( connectionReady() )
     {
-        ConnectionLost( L"Your connection has been terminated. The Microsoft::Maker::Serial::DfRobotBleSerial destructor was called unexpectedly." );
+        ConnectionLost( L"Your connection has been terminated. The Microsoft::Maker::Serial::CurieBleSerial destructor was called unexpectedly." );
     }
     end();
 }
@@ -94,7 +98,7 @@ DfRobotBleSerial::~DfRobotBleSerial(
 //******************************************************************************
 
 uint16_t
-DfRobotBleSerial::available(
+CurieBleSerial::available(
     void
     )
 {
@@ -113,7 +117,7 @@ DfRobotBleSerial::available(
 /// \details Immediately discards the incoming parameters, because they are used for standard serial connections and will have no bearing on a bluetooth connection.
 /// \warning Must be called from the UI thread
 void
-DfRobotBleSerial::begin(
+CurieBleSerial::begin(
     uint32_t baud_,
     SerialConfig config_
     )
@@ -154,17 +158,17 @@ DfRobotBleSerial::begin(
         }
         catch (Platform::Exception ^e)
         {
-            ConnectionFailed(L"DfRobotBleSerial::connectToDeviceAsync failed with a Platform::Exception type. (message: " + e->Message + L")");
+            ConnectionFailed(L"CurieBleSerial::connectToDeviceAsync failed with a Platform::Exception type. (message: " + e->Message + L")");
         }
         catch (...)
         {
-            ConnectionFailed(L"DfRobotBleSerial::connectToDeviceAsync failed with a non-Platform::Exception type. (name: " + _device_name + L")");
+            ConnectionFailed(L"CurieBleSerial::connectToDeviceAsync failed with a non-Platform::Exception type. (name: " + _device_name + L")");
         }
     });
 }
 
 bool
-DfRobotBleSerial::connectionReady(
+CurieBleSerial::connectionReady(
     void
     )
 {
@@ -173,26 +177,28 @@ DfRobotBleSerial::connectionReady(
 
 /// \ref https://social.msdn.microsoft.com/Forums/windowsapps/en-US/961c9d61-99ad-4a1b-82dc-22b6bd81aa2e/error-c2039-close-is-not-a-member-of-windowsstoragestreamsdatawriter?forum=winappswithnativecode
 void
-DfRobotBleSerial::end(
+CurieBleSerial::end(
     void
     )
 {
     std::lock_guard<std::mutex> lock(_q_lock);
     _connection_ready =  false;
-    if (_gatt_characteristic) _gatt_characteristic->WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::None);
+    if (_gatt_rx_characteristic) _gatt_rx_characteristic->WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::None);
+    if (_gatt_tx_characteristic) _gatt_tx_characteristic->WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::None);
 
     // Reset with respect to dependencies
     _rx = std::queue<byte>();
     delete(_tx); //_tx->Close();
     _tx = nullptr;
-    _gatt_characteristic = nullptr;
+    _gatt_rx_characteristic = nullptr;
+    _gatt_tx_characteristic = nullptr;
     _gatt_service = nullptr;
     _gatt_device = nullptr;
     _device_collection = nullptr;
 }
 
 void
-DfRobotBleSerial::flush(
+CurieBleSerial::flush(
     void
     )
 {
@@ -201,7 +207,7 @@ DfRobotBleSerial::flush(
         return;
     }
 
-    create_task(_gatt_characteristic->WriteValueAsync(_tx->DetachBuffer(), GattWriteOption::WriteWithResponse))
+    create_task(_gatt_tx_characteristic->WriteValueAsync(_tx->DetachBuffer(), GattWriteOption::WriteWithResponse))
     .then([this](GattCommunicationStatus status_)
     {
         switch (status_) {
@@ -220,7 +226,7 @@ DfRobotBleSerial::flush(
 /// \ref https://msdn.microsoft.com/en-us/library/aa965711(VS.85).aspx
 /// \warning Must be called from UI thread
 Windows::Foundation::IAsyncOperation<Windows::Devices::Enumeration::DeviceInformationCollection ^> ^
-DfRobotBleSerial::listAvailableDevicesAsync(
+CurieBleSerial::listAvailableDevicesAsync(
     void
     )
 {
@@ -232,15 +238,15 @@ DfRobotBleSerial::listAvailableDevicesAsync(
 }
 
 void
-DfRobotBleSerial::lock(
+CurieBleSerial::lock(
     void
     )
 {
-    _dfrobot_lock.lock();
+    _curie_lock.lock();
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     uint8_t c_
     )
 {
@@ -248,7 +254,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     int32_t value_
     )
 {
@@ -256,7 +262,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     int32_t value_,
     Radix base_
     )
@@ -286,7 +292,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     uint32_t value_
     )
 {
@@ -294,7 +300,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     uint32_t value_,
     Radix base_
     )
@@ -324,7 +330,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     double value_
     )
 {
@@ -332,7 +338,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     double value_,
     int16_t decimal_places_
     )
@@ -349,7 +355,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::print(
+CurieBleSerial::print(
     const Platform::Array<uint8_t> ^buffer_
     )
 {
@@ -357,7 +363,7 @@ DfRobotBleSerial::print(
 }
 
 uint16_t
-DfRobotBleSerial::read(
+CurieBleSerial::read(
     void
     )
 {
@@ -373,15 +379,15 @@ DfRobotBleSerial::read(
 }
 
 void
-DfRobotBleSerial::unlock(
+CurieBleSerial::unlock(
     void
     )
 {
-    _dfrobot_lock.unlock();
+    _curie_lock.unlock();
 }
 
 uint16_t
-DfRobotBleSerial::write(
+CurieBleSerial::write(
     uint8_t c_
     )
 {
@@ -393,7 +399,7 @@ DfRobotBleSerial::write(
 }
 
 uint16_t
-DfRobotBleSerial::write(
+CurieBleSerial::write(
     const Platform::Array<uint8_t> ^buffer_
     )
 {
@@ -409,7 +415,7 @@ DfRobotBleSerial::write(
 //******************************************************************************
 
 Concurrency::task<void>
-DfRobotBleSerial::connectToDeviceAsync(
+CurieBleSerial::connectToDeviceAsync(
     Windows::Devices::Enumeration::DeviceInformation ^device_
     )
 {
@@ -427,12 +433,13 @@ DfRobotBleSerial::connectToDeviceAsync(
 
         // Enable TX
         _tx = ref new DataWriter();
-        _gatt_service = _gatt_device->GetGattService(DFROBOT_BLE_SERVICE_UUID);
-        _gatt_characteristic = _gatt_service->GetCharacteristics(DFROBOT_BLE_SERIAL_CHARACTERISTIC_UUID)->GetAt(0);
+        _gatt_service = _gatt_device->GetGattService(CURIE_BLE_SERVICE_UUID);
+        _gatt_tx_characteristic = _gatt_service->GetCharacteristics(CURIE_BLE_SERIAL_TX_CHARACTERISTIC_UUID)->GetAt(0);
 
         // Enable RX
-        _gatt_characteristic->ValueChanged += ref new Windows::Foundation::TypedEventHandler<GattCharacteristic ^, GattValueChangedEventArgs ^>(this, &DfRobotBleSerial::rxCallback);
-        _gatt_characteristic->WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
+        _gatt_rx_characteristic = _gatt_service->GetCharacteristics(CURIE_BLE_SERIAL_RX_CHARACTERISTIC_UUID)->GetAt(0);
+        _gatt_rx_characteristic->ValueChanged += ref new Windows::Foundation::TypedEventHandler<GattCharacteristic ^, GattValueChangedEventArgs ^>(this, &CurieBleSerial::rxCallback);
+        _gatt_rx_characteristic->WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
 
         // Set connection ready flag and fire connection established event
         _connection_ready = true;
@@ -441,7 +448,7 @@ DfRobotBleSerial::connectToDeviceAsync(
 }
 
 Windows::Devices::Enumeration::DeviceInformation ^
-DfRobotBleSerial::identifyDeviceFromCollection(
+CurieBleSerial::identifyDeviceFromCollection(
     Windows::Devices::Enumeration::DeviceInformationCollection ^devices_
     )
 {
@@ -458,7 +465,7 @@ DfRobotBleSerial::identifyDeviceFromCollection(
 }
 
 void
-DfRobotBleSerial::rxCallback(
+CurieBleSerial::rxCallback(
     GattCharacteristic ^sender,
     GattValueChangedEventArgs ^args
     )
