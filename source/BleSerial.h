@@ -24,7 +24,6 @@
 
 #pragma once
 #include "IStream.h"
-#include "BleSerial.h"
 #include <mutex>
 #include <queue>
 
@@ -32,7 +31,7 @@ namespace Microsoft {
 namespace Maker {
 namespace Serial {
 
-public ref class CurieBleSerial sealed : public IStream
+private ref class BleSerial sealed : public IStream
 {
 public:
     virtual event IStreamConnectionCallback ^ConnectionEstablished;
@@ -42,50 +41,34 @@ public:
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
-    CurieBleSerial(
-        Platform::String ^device_name_
-    )
-    {
-        _bleSerial = ref new BleSerial(
-            device_name_,
-            uuid_t{ 0x6E400001, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-            uuid_t{ 0x6E400002, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-            uuid_t{ 0x6E400003, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }
-        );
-    };
+    BleSerial(
+        Platform::String ^device_name_,
+        uuid_t BLE_SERVICE_UUID,
+        uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+        uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+    );
 
     ///<summary>
     ///A constructor which accepts a DeviceInformation object to explicitly specify which device to connect to.
     ///</summary>
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    CurieBleSerial(
-        Windows::Devices::Enumeration::DeviceInformation ^device_
-        ) 
-    {
-        _bleSerial = ref new BleSerial(
-            device_,
-            uuid_t{ 0x6E400001, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-            uuid_t{ 0x6E400002, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-            uuid_t{ 0x6E400003, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }
-        );
-    };
+    BleSerial(
+        Windows::Devices::Enumeration::DeviceInformation ^device_,
+        uuid_t BLE_SERVICE_UUID,
+        uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+        uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+    );
 
     virtual
-        ~CurieBleSerial(
-            void
-        )
-    {
-        _bleSerial->~BleSerial();
-    };
+    ~BleSerial(
+        void
+        );
 
     virtual
     uint16_t
-        available(
-            void
-        )
-    {
-        return _bleSerial->available();
-    };
+    available(
+        void
+        );
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     inline
@@ -95,110 +78,77 @@ public:
         )
     {
         //baud rate and serial configuration are unnecessary for BLE connections as we are not using asyncronous TTL
-        _bleSerial->begin();
+        begin( NULL, SerialConfig::NONE );
     }
 
     virtual
     void
-        begin(
-            uint32_t baud_,
-            SerialConfig config_
-        )
-    {
-        _bleSerial->begin(baud_, config_);
-    };
+    begin(
+        uint32_t baud_,
+        SerialConfig config_
+        );
 
     virtual
     bool
-        connectionReady(
-            void
-        )
-    {
-        _bleSerial->connectionReady();
-    };
+    connectionReady(
+        void
+        );
 
     virtual
     void
-        end(
-            void
-        )
-    {
-        _bleSerial->end();
-    };
+    end(
+        void
+        );
 
     virtual
     void
-        flush(
-            void
-        )
-    {
-        _bleSerial->flush();
-    };
+    flush(
+        void
+        );
 
     virtual
     void
-        lock(
-            void
-        )
-    {
-        _bleSerial->lock();
-    };
+    lock(
+        void
+        );
 
     virtual
     uint16_t
-        print(
-            uint8_t c_
-        )
-    {
-        return _bleSerial->print(c_);
-    };
+    print(
+          uint8_t c_
+         );
 
     virtual
     uint16_t
     print(
           int32_t value_
-         )
-    {
-        return _bleSerial->print(value_);
-    };
+         );
 
     virtual
     uint16_t
     print(
           int32_t value_,
           Radix base_
-         )
-    {
-        return _bleSerial->print(value_, base_);
-    };
+         );
 
     virtual
     uint16_t
     print(
           uint32_t value_
-         )
-    {
-        return _bleSerial->print(value_);
-    };
+         );
 
     virtual
     uint16_t
     print(
           uint32_t value_,
           Radix base_
-         )
-    {
-        return _bleSerial->print(value_, base_);
-    };
+         );
 
     virtual
     uint16_t
     print(
           double value_
-         )
-    {
-        return _bleSerial->print(value_);
-    };
+         );
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
@@ -206,57 +156,39 @@ public:
     print(
           double value_,
           int16_t decimal_place_
-         )
-    {
-        return _bleSerial->print(value_, decimal_place_);
-    };
+         );
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     print(
         const Platform::Array<uint8_t> ^buffer_
-        )
-    {
-        return _bleSerial->print(buffer_);
-    };
+        );
 
     virtual
     uint16_t
-        read(
-            void
-        )
-    {
-        return _bleSerial->read();
-    };
+    read(
+        void
+        );
 
     virtual
     void
-        unlock(
-            void
-        )
-    {
-        _bleSerial->unlock();
-    };
+    unlock(
+        void
+        );
 
     virtual
     uint16_t
     write(
         uint8_t c_
-        )
-    {
-        return _bleSerial->write(c_);
-    };
+        );
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
     write(
         const Platform::Array<uint8_t> ^buffer_
-        )
-    {
-        return _bleSerial->write(buffer_);
-    };
+        );
 
     ///<summary>
     ///Begins an asyncronous request for all Bluetooth LE devices that are paired and may be used to attempt a device connection.
@@ -265,13 +197,46 @@ public:
     Windows::Foundation::IAsyncOperation<Windows::Devices::Enumeration::DeviceInformationCollection ^> ^
     listAvailableDevicesAsync(
         void
-        )
-    {
-        return BleSerial::listAvailableDevicesAsync();
-    };
+        );
 
 private:
-    BleSerial^ _bleSerial;
+    const uuid_t BLE_SERVICE_UUID;
+    const uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID;
+    const uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID;
+
+    // Device specific members (set during instantation)
+    Windows::Devices::Enumeration::DeviceInformation ^_device;
+    Platform::String ^_device_name;
+
+    //thread-safe mechanisms. std::unique_lock used to manage the lifecycle of std::mutex
+    std::mutex _mutex;
+    std::unique_lock<std::mutex> _ble_lock;
+
+    std::atomic_bool _connection_ready;
+    Windows::Devices::Enumeration::DeviceInformationCollection ^_device_collection;
+    Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic ^_gatt_rx_characteristic;
+    Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic ^_gatt_tx_characteristic;
+    Windows::Devices::Bluetooth::BluetoothLEDevice ^_gatt_device;
+    Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceService ^_gatt_service;
+    std::mutex _q_lock;
+    std::queue<byte> _rx;
+    Windows::Storage::Streams::DataWriter ^_tx;
+
+    Concurrency::task<void>
+    connectToDeviceAsync(
+        Windows::Devices::Enumeration::DeviceInformation ^device_
+        );
+
+    Windows::Devices::Enumeration::DeviceInformation ^
+    identifyDeviceFromCollection(
+        Windows::Devices::Enumeration::DeviceInformationCollection ^devices_
+        );
+
+    void
+    rxCallback(
+        Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic ^sender,
+        Windows::Devices::Bluetooth::GenericAttributeProfile::GattValueChangedEventArgs ^args
+        );
 };
 
 } // namespace Serial

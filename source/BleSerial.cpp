@@ -23,7 +23,7 @@
 */
 
 #include "pch.h"
-#include "CurieBleSerial.h"
+#include "BleSerial.h"
 
 #include <bitset>
 
@@ -39,38 +39,62 @@ using namespace Microsoft::Maker::Serial;
 //* Constructors
 //******************************************************************************
 
-CurieBleSerial::CurieBleSerial(Platform::String ^device_name_)
+BleSerial::BleSerial(
+    Platform::String ^device_name_,
+    const uuid_t BLE_SERVICE_UUID,
+    const uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+    const uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+    ) :
+    BLE_SERVICE_UUID(BLE_SERVICE_UUID),
+    BLE_SERIAL_RX_CHARACTERISTIC_UUID(BLE_SERIAL_RX_CHARACTERISTIC_UUID),
+    BLE_SERIAL_TX_CHARACTERISTIC_UUID(BLE_SERIAL_TX_CHARACTERISTIC_UUID),
+    _connection_ready(ATOMIC_VAR_INIT(false)),
+    _ble_lock(_mutex, std::defer_lock),
+    _device(nullptr),
+    _device_collection(nullptr),
+    _device_name(device_name_),
+    _gatt_rx_characteristic(nullptr),
+    _gatt_tx_characteristic(nullptr),
+    _gatt_device(nullptr),
+    _gatt_service(nullptr),
+    _tx(nullptr)
 {
-    _bleSerial = ref new BleSerial(
-        device_name_,
-        uuid_t{ 0x6E400001, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-        uuid_t{ 0x6E400002, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-        uuid_t{ 0x6E400003, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }
-    );
 }
 
-CurieBleSerial::CurieBleSerial(DeviceInformation ^device_)
+BleSerial::BleSerial(
+    DeviceInformation ^device_,
+    const uuid_t BLE_SERVICE_UUID,
+    const uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+    const uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+    ) :
+    BLE_SERVICE_UUID(BLE_SERVICE_UUID),
+    BLE_SERIAL_RX_CHARACTERISTIC_UUID(BLE_SERIAL_RX_CHARACTERISTIC_UUID),
+    BLE_SERIAL_TX_CHARACTERISTIC_UUID(BLE_SERIAL_TX_CHARACTERISTIC_UUID),
+    _connection_ready(ATOMIC_VAR_INIT(false)),
+    _ble_lock(_mutex, std::defer_lock),
+    _device(device_),
+    _device_name(nullptr),
+    _device_collection(nullptr),
+    _gatt_rx_characteristic(nullptr),
+    _gatt_tx_characteristic(nullptr),
+    _gatt_device(nullptr),
+    _gatt_service(nullptr),
+    _tx(nullptr)
 {
-    _bleSerial = ref new BleSerial(
-        device_,
-        uuid_t{ 0x6E400001, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-        uuid_t{ 0x6E400002, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } },
-        uuid_t{ 0x6E400003, 0xB5A3, 0xF393,{ 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E } }
-    );
 }
 
 //******************************************************************************
 //* Destructors
 //******************************************************************************
 
-CurieBleSerial::~CurieBleSerial(
+BleSerial::~BleSerial(
     void
     )
 {
     //we will fire the ConnectionLost event in the case that this object is unexpectedly destructed while the connection is established.
     if( connectionReady() )
     {
-        ConnectionLost( L"Your connection has been terminated. The Microsoft::Maker::Serial::CurieBleSerial destructor was called unexpectedly." );
+        ConnectionLost( L"Your connection has been terminated. The Microsoft::Maker::Serial::BleSerial destructor was called unexpectedly." );
     }
     end();
 }
@@ -79,12 +103,27 @@ CurieBleSerial::~CurieBleSerial(
 //* Public Methods
 //******************************************************************************
 
-uint16_t CurieBleSerial::available(void){_bleSerial->available();}
+uint16_t
+BleSerial::available(
+    void
+    )
+{
+    // Check to see if connection is ready
+    if (!connectionReady()) {
+        return 0;
+    }
+    else {
+        std::lock_guard<std::mutex> lock(_q_lock);
+		if (_rx.size() > 0xFFFF) { return 0xFFFF; }
+		return static_cast<uint16_t>(_rx.size());
+
+    }
+}
 
 /// \details Immediately discards the incoming parameters, because they are used for standard serial connections and will have no bearing on a bluetooth connection.
 /// \warning Must be called from the UI thread
 void
-CurieBleSerial::begin(
+BleSerial::begin(
     uint32_t baud_,
     SerialConfig config_
     )
@@ -125,17 +164,17 @@ CurieBleSerial::begin(
         }
         catch (Platform::Exception ^e)
         {
-            ConnectionFailed(L"CurieBleSerial::connectToDeviceAsync failed with a Platform::Exception type. (message: " + e->Message + L")");
+            ConnectionFailed(L"BleSerial::connectToDeviceAsync failed with a Platform::Exception type. (message: " + e->Message + L")");
         }
         catch (...)
         {
-            ConnectionFailed(L"CurieBleSerial::connectToDeviceAsync failed with a non-Platform::Exception type. (name: " + _device_name + L")");
+            ConnectionFailed(L"BleSerial::connectToDeviceAsync failed with a non-Platform::Exception type. (name: " + _device_name + L")");
         }
     });
 }
 
 bool
-CurieBleSerial::connectionReady(
+BleSerial::connectionReady(
     void
     )
 {
@@ -144,7 +183,7 @@ CurieBleSerial::connectionReady(
 
 /// \ref https://social.msdn.microsoft.com/Forums/windowsapps/en-US/961c9d61-99ad-4a1b-82dc-22b6bd81aa2e/error-c2039-close-is-not-a-member-of-windowsstoragestreamsdatawriter?forum=winappswithnativecode
 void
-CurieBleSerial::end(
+BleSerial::end(
     void
     )
 {
@@ -165,7 +204,7 @@ CurieBleSerial::end(
 }
 
 void
-CurieBleSerial::flush(
+BleSerial::flush(
     void
     )
 {
@@ -193,7 +232,7 @@ CurieBleSerial::flush(
 /// \ref https://msdn.microsoft.com/en-us/library/aa965711(VS.85).aspx
 /// \warning Must be called from UI thread
 Windows::Foundation::IAsyncOperation<Windows::Devices::Enumeration::DeviceInformationCollection ^> ^
-CurieBleSerial::listAvailableDevicesAsync(
+BleSerial::listAvailableDevicesAsync(
     void
     )
 {
@@ -205,15 +244,15 @@ CurieBleSerial::listAvailableDevicesAsync(
 }
 
 void
-CurieBleSerial::lock(
+BleSerial::lock(
     void
     )
 {
-    _curie_lock.lock();
+    _ble_lock.lock();
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     uint8_t c_
     )
 {
@@ -221,7 +260,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     int32_t value_
     )
 {
@@ -229,7 +268,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     int32_t value_,
     Radix base_
     )
@@ -259,7 +298,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     uint32_t value_
     )
 {
@@ -267,7 +306,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     uint32_t value_,
     Radix base_
     )
@@ -297,7 +336,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     double value_
     )
 {
@@ -305,7 +344,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     double value_,
     int16_t decimal_places_
     )
@@ -322,7 +361,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::print(
+BleSerial::print(
     const Platform::Array<uint8_t> ^buffer_
     )
 {
@@ -330,7 +369,7 @@ CurieBleSerial::print(
 }
 
 uint16_t
-CurieBleSerial::read(
+BleSerial::read(
     void
     )
 {
@@ -346,15 +385,15 @@ CurieBleSerial::read(
 }
 
 void
-CurieBleSerial::unlock(
+BleSerial::unlock(
     void
     )
 {
-    _curie_lock.unlock();
+    _ble_lock.unlock();
 }
 
 uint16_t
-CurieBleSerial::write(
+BleSerial::write(
     uint8_t c_
     )
 {
@@ -366,7 +405,7 @@ CurieBleSerial::write(
 }
 
 uint16_t
-CurieBleSerial::write(
+BleSerial::write(
     const Platform::Array<uint8_t> ^buffer_
     )
 {
@@ -375,4 +414,76 @@ CurieBleSerial::write(
 
     _tx->WriteBytes(buffer_);
     return buffer_->Length;
+}
+
+//******************************************************************************
+//* Private Methods
+//******************************************************************************
+
+Concurrency::task<void>
+BleSerial::connectToDeviceAsync(
+    Windows::Devices::Enumeration::DeviceInformation ^device_
+    )
+{
+    _device_name = device_->Name;  // Update name in case device was specified directly
+    return Concurrency::create_task(Windows::Devices::Bluetooth::BluetoothLEDevice::FromIdAsync(device_->Id))
+        .then([this](Windows::Devices::Bluetooth::BluetoothLEDevice ^gatt_device_)
+    {
+        if( gatt_device_ == nullptr )
+        {
+            throw ref new Platform::Exception( E_UNEXPECTED, ref new Platform::String( L"Unable to initialize the device. BluetoothLEDevice::FromIdAsync returned null." ) );
+        }
+
+        // Store parameter as a member to ensure the duration of object allocation
+        _gatt_device = gatt_device_;
+
+        // Enable TX
+        _tx = ref new DataWriter();
+        _gatt_service = _gatt_device->GetGattService(BLE_SERVICE_UUID);
+        _gatt_tx_characteristic = _gatt_service->GetCharacteristics(BLE_SERIAL_TX_CHARACTERISTIC_UUID)->GetAt(0);
+
+        // Enable RX
+        _gatt_rx_characteristic = _gatt_service->GetCharacteristics(BLE_SERIAL_RX_CHARACTERISTIC_UUID)->GetAt(0);
+        _gatt_rx_characteristic->ValueChanged += ref new Windows::Foundation::TypedEventHandler<GattCharacteristic ^, GattValueChangedEventArgs ^>(this, &BleSerial::rxCallback);
+        _gatt_rx_characteristic->WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
+
+        // Set connection ready flag and fire connection established event
+        _connection_ready = true;
+        ConnectionEstablished();
+    });
+}
+
+Windows::Devices::Enumeration::DeviceInformation ^
+BleSerial::identifyDeviceFromCollection(
+    Windows::Devices::Enumeration::DeviceInformationCollection ^devices_
+    )
+{
+    for(auto &&device : devices_)
+    {
+        if (device->Id->Equals(_device_name) || device->Name->Equals(_device_name))
+        {
+            return device;
+        }
+    }
+
+    // If we searched and found nothing that matches the identifier, we've failed to connect and cannot recover.
+    throw ref new Platform::Exception(E_INVALIDARG, L"No Bluetooth LE devices found matching the specified identifier.");
+}
+
+void
+BleSerial::rxCallback(
+    GattCharacteristic ^sender,
+    GattValueChangedEventArgs ^args
+    )
+{
+    // Extract data into workable form from parameters
+    Platform::Array<byte> ^rx_data = ref new Platform::Array<byte>(args->CharacteristicValue->Length);
+    DataReader::FromBuffer(args->CharacteristicValue)->ReadBytes(rx_data);
+
+    {
+        std::lock_guard<std::mutex> lock(_q_lock);
+        std::for_each(rx_data->Data, rx_data->Data + rx_data->Length, [this](byte data_) {
+            _rx.push(data_);
+        });
+    }
 }
