@@ -38,6 +38,7 @@ public:
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
 
+internal:
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
@@ -59,6 +60,7 @@ public:
         uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
     );
 
+public:
     virtual
     ~BleSerial(
         void
