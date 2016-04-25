@@ -41,11 +41,11 @@ using namespace Microsoft::Maker::Serial;
 
 BleSerial::BleSerial(
     Platform::String ^device_name_,
-    const uuid_t BLE_SERVICE_UUID,
-    const uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
-    const uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+    Platform::Guid BLE_SERVICE_UUID,
+    Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+    Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID
     ) :
-    BLE_SERVICE_UUID(BLE_SERVICE_UUID),
+    BLE_SERVICE_UUID( BLE_SERVICE_UUID),
     BLE_SERIAL_RX_CHARACTERISTIC_UUID(BLE_SERIAL_RX_CHARACTERISTIC_UUID),
     BLE_SERIAL_TX_CHARACTERISTIC_UUID(BLE_SERIAL_TX_CHARACTERISTIC_UUID),
     _connection_ready(ATOMIC_VAR_INIT(false)),
@@ -63,9 +63,9 @@ BleSerial::BleSerial(
 
 BleSerial::BleSerial(
     DeviceInformation ^device_,
-    const uuid_t BLE_SERVICE_UUID,
-    const uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
-    const uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+    Platform::Guid BLE_SERVICE_UUID,
+    Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+    Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID
     ) :
     BLE_SERVICE_UUID(BLE_SERVICE_UUID),
     BLE_SERIAL_RX_CHARACTERISTIC_UUID(BLE_SERIAL_RX_CHARACTERISTIC_UUID),

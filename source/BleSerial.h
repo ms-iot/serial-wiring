@@ -31,22 +31,21 @@ namespace Microsoft {
 namespace Maker {
 namespace Serial {
 
-private ref class BleSerial sealed : public IStream
+public ref class BleSerial sealed : public IStream
 {
 public:
     virtual event IStreamConnectionCallback ^ConnectionEstablished;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
 
-internal:
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
     BleSerial(
         Platform::String ^device_name_,
-        uuid_t BLE_SERVICE_UUID,
-        uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
-        uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+        Platform::Guid BLE_SERVICE_UUID,
+        Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+        Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID
     );
 
     ///<summary>
@@ -55,12 +54,11 @@ internal:
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     BleSerial(
         Windows::Devices::Enumeration::DeviceInformation ^device_,
-        uuid_t BLE_SERVICE_UUID,
-        uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID,
-        uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID
+        Platform::Guid BLE_SERVICE_UUID,
+        Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
+        Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID
     );
 
-public:
     virtual
     ~BleSerial(
         void
@@ -202,9 +200,9 @@ public:
         );
 
 private:
-    const uuid_t BLE_SERVICE_UUID;
-    const uuid_t BLE_SERIAL_RX_CHARACTERISTIC_UUID;
-    const uuid_t BLE_SERIAL_TX_CHARACTERISTIC_UUID;
+    Platform::Guid BLE_SERVICE_UUID;
+    Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID;
+    Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID;
 
     // Device specific members (set during instantation)
     Windows::Devices::Enumeration::DeviceInformation ^_device;

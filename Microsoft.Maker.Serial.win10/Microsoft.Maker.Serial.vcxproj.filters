@@ -21,7 +21,7 @@
     <ClInclude Include="..\source\IStream.h" />
     <ClInclude Include="..\source\NetworkSerial.h" />
     <ClInclude Include="..\source\USBSerial.h" />
-    <ClInclude Include="..\source\CurieBleSerial.h" />
     <ClInclude Include="..\source\BleSerial.h" />
+    <ClInclude Include="..\source\CurieBleSerial.h" />
   </ItemGroup>
 </Project>
