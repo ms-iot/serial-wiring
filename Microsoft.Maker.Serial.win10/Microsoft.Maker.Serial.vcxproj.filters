@@ -9,7 +9,6 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="..\source\BluetoothSerial.cpp" />
-    <ClCompile Include="..\source\DfRobotBleSerial.cpp" />
     <ClCompile Include="..\source\NetworkSerial.cpp" />
     <ClCompile Include="..\source\USBSerial.cpp" />
     <ClCompile Include="..\source\BleSerial.cpp" />
