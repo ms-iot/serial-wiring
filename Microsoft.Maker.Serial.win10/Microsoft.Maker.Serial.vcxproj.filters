@@ -13,6 +13,7 @@
     <ClCompile Include="..\source\USBSerial.cpp" />
     <ClCompile Include="..\source\BleSerial.cpp" />
     <ClCompile Include="..\source\DfRobotBleSerial.cpp" />
+    <ClCompile Include="..\source\CurieBleSerial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
