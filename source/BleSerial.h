@@ -200,9 +200,9 @@ public:
         );
 
 private:
-    Platform::Guid BLE_SERVICE_UUID;
-    Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID;
-    Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID;
+    const Platform::Guid BLE_SERVICE_UUID;
+    const Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID;
+    const Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID;
 
     // Device specific members (set during instantation)
     Windows::Devices::Enumeration::DeviceInformation ^_device;

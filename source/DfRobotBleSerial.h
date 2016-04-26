@@ -44,14 +44,14 @@ namespace Microsoft {
                 ///</summary>
                 DfRobotBleSerial(
                     Platform::String ^device_name_
-                )
-                {
-                    _bleSerial = ref new BleSerial(
+                ) :
+                    _bleSerial(ref new BleSerial(
                         device_name_,
                         Platform::Guid{ 0x6E400001, 0xB5A3, 0xF393, (0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E) },
                         Platform::Guid{ 0x6E400002, 0xB5A3, 0xF393, (0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E) },
                         Platform::Guid{ 0x6E400003, 0xB5A3, 0xF393, (0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E) }
-                    );
+                    ))
+                {                 
                 };
 
                 ///<summary>
@@ -60,14 +60,14 @@ namespace Microsoft {
                 [Windows::Foundation::Metadata::DefaultOverloadAttribute]
                 DfRobotBleSerial(
                     Windows::Devices::Enumeration::DeviceInformation ^device_
-                )
-                {
-                    _bleSerial = ref new BleSerial(
+                ) :
+                    _bleSerial(ref new BleSerial(
                         device_,
                         Platform::Guid{ 0x6E400001, 0xB5A3, 0xF393, (0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E) },
                         Platform::Guid{ 0x6E400002, 0xB5A3, 0xF393, (0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E) },
                         Platform::Guid{ 0x6E400003, 0xB5A3, 0xF393, (0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E) }
-                    );
+                    ))
+                {
                 };
 
                 virtual
