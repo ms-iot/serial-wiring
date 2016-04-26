@@ -71,6 +71,7 @@ public:
     };
 
     virtual
+    inline
         ~CurieBleSerial(
             void
         )
@@ -79,6 +80,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
         available(
             void
@@ -88,6 +90,7 @@ public:
     };
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual
     inline
     void
     begin(
@@ -109,6 +112,7 @@ public:
     };
 
     virtual
+	inline
     bool
         connectionReady(
             void
@@ -118,6 +122,7 @@ public:
     };
 
     virtual
+	inline
     void
         end(
             void
@@ -127,6 +132,7 @@ public:
     };
 
     virtual
+	inline
     void
         flush(
             void
@@ -136,6 +142,7 @@ public:
     };
 
     virtual
+	inline
     void
         lock(
             void
@@ -145,6 +152,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
         print(
             uint8_t c_
@@ -154,6 +162,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
     print(
           int32_t value_
@@ -163,6 +172,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
     print(
           int32_t value_,
@@ -173,6 +183,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
     print(
           uint32_t value_
@@ -182,6 +193,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
     print(
           uint32_t value_,
@@ -192,6 +204,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
     print(
           double value_
@@ -202,6 +215,7 @@ public:
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
+	inline
     uint16_t
     print(
           double value_,
@@ -213,6 +227,7 @@ public:
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
+	inline
     uint16_t
     print(
         const Platform::Array<uint8_t> ^buffer_
@@ -222,6 +237,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
         read(
             void
@@ -231,6 +247,7 @@ public:
     };
 
     virtual
+	inline
     void
         unlock(
             void
@@ -240,6 +257,7 @@ public:
     };
 
     virtual
+	inline
     uint16_t
     write(
         uint8_t c_
@@ -250,6 +268,7 @@ public:
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
+	inline
     uint16_t
     write(
         const Platform::Array<uint8_t> ^buffer_
@@ -261,6 +280,7 @@ public:
     ///<summary>
     ///Begins an asyncronous request for all Bluetooth LE devices that are paired and may be used to attempt a device connection.
     ///</summary>
+    inline
     static
     Windows::Foundation::IAsyncOperation<Windows::Devices::Enumeration::DeviceInformationCollection ^> ^
     listAvailableDevicesAsync(
