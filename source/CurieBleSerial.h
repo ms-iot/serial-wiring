@@ -293,7 +293,7 @@ public:
     };
 
 private:
-    BleSerial^ _bleSerial;
+    BleSerial ^ const _bleSerial;
 
     inline
     void
