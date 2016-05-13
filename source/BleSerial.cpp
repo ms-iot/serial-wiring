@@ -213,7 +213,7 @@ BleSerial::flush(
         return;
     }
 
-    create_task(_gatt_tx_characteristic->WriteValueAsync(_tx->DetachBuffer(), GattWriteOption::WriteWithResponse))
+    create_task(_gatt_tx_characteristic->WriteValueAsync(_tx->DetachBuffer(), GattWriteOption::WriteWithoutResponse))
     .then([this](GattCommunicationStatus status_)
     {
         switch (status_) {
