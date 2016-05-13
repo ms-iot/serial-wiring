@@ -97,7 +97,7 @@ namespace Serial {
             )
         {
             //baud rate and serial configuration are unnecessary for BLE connections as we are not using asyncronous TTL
-            _bleSerial->begin();
+            begin(NULL, SerialConfig::NONE);
         }
 
         virtual
@@ -108,6 +108,9 @@ namespace Serial {
                 SerialConfig config_
             )
         {
+            _bleSerial->ConnectionEstablished += ref new IStreamConnectionCallback(this, &DfRobotBleSerial::OnConnectionEstablished);
+            _bleSerial->ConnectionLost += ref new IStreamConnectionCallbackWithMessage(this, &DfRobotBleSerial::OnConnectionLost);
+            _bleSerial->ConnectionFailed += ref new IStreamConnectionCallbackWithMessage(this, &DfRobotBleSerial::OnConnectionFailed);
             _bleSerial->begin(baud_, config_);
         };
 
@@ -292,6 +295,27 @@ namespace Serial {
 
     private:
         BleSerial^ _bleSerial;
+
+        inline
+        void
+            OnConnectionEstablished()
+        {
+            ConnectionEstablished();
+        };
+
+        inline
+        void
+            OnConnectionLost(Platform::String ^message)
+        {
+            ConnectionLost(message);
+        };
+
+        inline
+        void
+            OnConnectionFailed(Platform::String ^message)
+        {
+            ConnectionFailed(message);
+        };
     };
 
 } // namespace Serial
