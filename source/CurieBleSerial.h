@@ -97,7 +97,7 @@ public:
         )
     {
         //baud rate and serial configuration are unnecessary for BLE connections as we are not using asyncronous TTL
-        _bleSerial->begin();
+        begin(NULL, SerialConfig::NONE);
     }
 
     virtual
@@ -107,6 +107,9 @@ public:
             SerialConfig config_
         )
     {
+        _bleSerial->ConnectionEstablished += ref new IStreamConnectionCallback(this, &CurieBleSerial::OnConnectionEstablished);
+        _bleSerial->ConnectionLost += ref new IStreamConnectionCallbackWithMessage(this, &CurieBleSerial::OnConnectionLost);
+        _bleSerial->ConnectionFailed += ref new IStreamConnectionCallbackWithMessage(this, &CurieBleSerial::OnConnectionFailed);
         _bleSerial->begin(baud_, config_);
     };
 
@@ -291,6 +294,27 @@ public:
 
 private:
     BleSerial^ _bleSerial;
+
+    inline
+    void
+        OnConnectionEstablished()
+    {
+        ConnectionEstablished();
+    };
+
+    inline
+    void
+        OnConnectionLost(Platform::String ^message)
+    {
+        ConnectionLost(message);
+    };
+
+    inline
+    void
+    OnConnectionFailed(Platform::String ^message)
+    {
+        ConnectionFailed(message);
+    };
 };
 
 } // namespace Serial

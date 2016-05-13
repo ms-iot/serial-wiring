@@ -237,7 +237,7 @@ BleSerial::listAvailableDevicesAsync(
     )
 {
     // Construct AQS String for Bluetooth LE devices
-    Platform::String ^device_aqs = Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceService::GetDeviceSelectorFromUuid(Windows::Devices::Bluetooth::GenericAttributeProfile::GattServiceUuids::GenericAccess);
+    Platform::String ^device_aqs = Windows::Devices::Bluetooth::BluetoothLEDevice::GetDeviceSelector();
 
     // Identify all paired devices satisfying query
     return Windows::Devices::Enumeration::DeviceInformation::FindAllAsync(device_aqs);
