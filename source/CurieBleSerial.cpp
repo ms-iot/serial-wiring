@@ -25,7 +25,7 @@
 /*
     Implementation of DfRobotBleSerial is contained in the DfRobotBleSerial.h
     header file. The main implementation of BleSerial is in BleSerial .h/.cpp
-    All new specific BleImplementations should follow the same pattern for 
+    All new specific BleImplementations should follow the same pattern for
     implementing BleSerial. Such an implementation is only necessary for ease
     of use, so that consuming applications do not need to provide the BLE
     characteristics for the device.
@@ -33,4 +33,4 @@
 
 //  This file and these includes are required for successfull compilation.
 #include "pch.h"
-#include "DfRobotBleSerial.h"
+#include "CurieBleSerial.h"
