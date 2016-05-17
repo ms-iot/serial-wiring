@@ -9,9 +9,11 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="..\source\BluetoothSerial.cpp" />
-    <ClCompile Include="..\source\DfRobotBleSerial.cpp" />
     <ClCompile Include="..\source\NetworkSerial.cpp" />
     <ClCompile Include="..\source\USBSerial.cpp" />
+    <ClCompile Include="..\source\BleSerial.cpp" />
+    <ClCompile Include="..\source\DfRobotBleSerial.cpp" />
+    <ClCompile Include="..\source\CurieBleSerial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -20,5 +22,7 @@
     <ClInclude Include="..\source\IStream.h" />
     <ClInclude Include="..\source\NetworkSerial.h" />
     <ClInclude Include="..\source\USBSerial.h" />
+    <ClInclude Include="..\source\BleSerial.h" />
+    <ClInclude Include="..\source\CurieBleSerial.h" />
   </ItemGroup>
 </Project>
