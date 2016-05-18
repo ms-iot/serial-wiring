@@ -23,7 +23,7 @@
 */
 
 /*
-    Implementation of DfRobotBleSerial is contained in the DfRobotBleSerial.h
+    Implementation of CurieBleSerial is contained in the CurieBleSerial.h
     header file. The main implementation of BleSerial is in BleSerial .h/.cpp
     All new specific BleImplementations should follow the same pattern for
     implementing BleSerial. Such an implementation is only necessary for ease

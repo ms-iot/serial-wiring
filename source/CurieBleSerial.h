@@ -99,7 +99,8 @@ public:
         //baud rate and serial configuration are unnecessary for BLE connections as we are not using asyncronous TTL
         begin(NULL, SerialConfig::NONE);
     }
-
+    
+    inline
     virtual
     void
         begin(
