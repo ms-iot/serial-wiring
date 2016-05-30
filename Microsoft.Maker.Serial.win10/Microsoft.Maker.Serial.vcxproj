@@ -222,6 +222,7 @@
     <ClInclude Include="..\source\DfRobotBleSerial.h" />
     <ClInclude Include="..\source\IStream.h" />
     <ClInclude Include="..\source\NetworkSerial.h" />
+    <ClInclude Include="..\source\RedBearLabBleSerial.h" />
     <ClInclude Include="..\source\USBSerial.h" />
     <ClInclude Include="..\source\BleSerial.h" />
     <ClInclude Include="pch.h" />
@@ -232,6 +233,7 @@
     <ClCompile Include="..\source\CurieBleSerial.cpp" />
     <ClCompile Include="..\source\DfRobotBleSerial.cpp" />
     <ClCompile Include="..\source\NetworkSerial.cpp" />
+    <ClCompile Include="..\source\RedBearLabBleSerial.cpp" />
     <ClCompile Include="..\source\USBSerial.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
