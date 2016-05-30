@@ -39,12 +39,12 @@ using namespace Microsoft::Maker::Serial;
 //* Constructors
 //******************************************************************************
 
-BleSerial::BleSerial(
+BleSerial::BleSerial (
     Platform::String ^device_name_,
     Platform::Guid BLE_SERVICE_UUID,
     Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
     Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID
-    ) :
+) :
     BLE_SERVICE_UUID( BLE_SERVICE_UUID),
     BLE_SERIAL_RX_CHARACTERISTIC_UUID(BLE_SERIAL_RX_CHARACTERISTIC_UUID),
     BLE_SERIAL_TX_CHARACTERISTIC_UUID(BLE_SERIAL_TX_CHARACTERISTIC_UUID),
@@ -58,15 +58,14 @@ BleSerial::BleSerial(
     _gatt_device(nullptr),
     _gatt_service(nullptr),
     _tx(nullptr)
-{
-}
+{ }
 
-BleSerial::BleSerial(
+BleSerial::BleSerial (
     DeviceInformation ^device_,
     Platform::Guid BLE_SERVICE_UUID,
     Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
     Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID
-    ) :
+) :
     BLE_SERVICE_UUID(BLE_SERVICE_UUID),
     BLE_SERIAL_RX_CHARACTERISTIC_UUID(BLE_SERIAL_RX_CHARACTERISTIC_UUID),
     BLE_SERIAL_TX_CHARACTERISTIC_UUID(BLE_SERIAL_TX_CHARACTERISTIC_UUID),
@@ -80,17 +79,15 @@ BleSerial::BleSerial(
     _gatt_device(nullptr),
     _gatt_service(nullptr),
     _tx(nullptr)
-{
-}
+{ }
 
 //******************************************************************************
 //* Destructors
 //******************************************************************************
 
-BleSerial::~BleSerial(
+BleSerial::~BleSerial (
     void
-    )
-{
+) {
     //we will fire the ConnectionLost event in the case that this object is unexpectedly destructed while the connection is established.
     if( connectionReady() )
     {
@@ -104,15 +101,13 @@ BleSerial::~BleSerial(
 //******************************************************************************
 
 uint16_t
-BleSerial::available(
+BleSerial::available (
     void
-    )
-{
+) {
     // Check to see if connection is ready
     if (!connectionReady()) {
         return 0;
-    }
-    else {
+    } else {
         std::lock_guard<std::mutex> lock(_q_lock);
 		if (_rx.size() > 0xFFFF) { return 0xFFFF; }
 		return static_cast<uint16_t>(_rx.size());
@@ -123,11 +118,10 @@ BleSerial::available(
 /// \details Immediately discards the incoming parameters, because they are used for standard serial connections and will have no bearing on a bluetooth connection.
 /// \warning Must be called from the UI thread
 void
-BleSerial::begin(
+BleSerial::begin (
     uint32_t baud_,
     SerialConfig config_
-    )
-{
+) {
     // Discard incoming parameters inherited from IStream interface.
     UNREFERENCED_PARAMETER(baud_);
     UNREFERENCED_PARAMETER(config_);
@@ -137,8 +131,7 @@ BleSerial::begin(
 
     // Although this path is not optimal, the behavior (the calls must be made from the UI thread) is mandated by the bluetooth API. The algorithm is a compromise to provide the succint, maintainable code.
     Concurrency::create_task(listAvailableDevicesAsync())
-        .then([this](Windows::Devices::Enumeration::DeviceInformationCollection ^device_collection_)
-    {
+    .then([this](Windows::Devices::Enumeration::DeviceInformationCollection ^device_collection_) {
         // If a friendly name was specified, then identify the associated device
         if (_device_name) {
             // Store parameter as a member to ensure the duration of object allocation
@@ -156,8 +149,7 @@ BleSerial::begin(
         }
 
         return connectToDeviceAsync(_device);
-    }).then([this](Concurrency::task<void> t)
-    {
+    }).then([this](Concurrency::task<void> t) {
         try
         {
             t.get();
@@ -174,19 +166,17 @@ BleSerial::begin(
 }
 
 bool
-BleSerial::connectionReady(
+BleSerial::connectionReady (
     void
-    )
-{
+) {
     return _connection_ready;
 }
 
 /// \ref https://social.msdn.microsoft.com/Forums/windowsapps/en-US/961c9d61-99ad-4a1b-82dc-22b6bd81aa2e/error-c2039-close-is-not-a-member-of-windowsstoragestreamsdatawriter?forum=winappswithnativecode
 void
-BleSerial::end(
+BleSerial::end (
     void
-    )
-{
+) {
     std::lock_guard<std::mutex> lock(_q_lock);
     _connection_ready =  false;
     if (_gatt_rx_characteristic) _gatt_rx_characteristic->WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::None);
@@ -204,18 +194,13 @@ BleSerial::end(
 }
 
 void
-BleSerial::flush(
+BleSerial::flush (
     void
-    )
-{
-    if ( !connectionReady() )
-    {
-        return;
-    }
+) {
+    if ( !connectionReady() ) { return; }
 
     create_task(_gatt_tx_characteristic->WriteValueAsync(_tx->DetachBuffer(), GattWriteOption::WriteWithoutResponse))
-    .then([this](GattCommunicationStatus status_)
-    {
+    .then([this](GattCommunicationStatus status_) {
         switch (status_) {
         case GattCommunicationStatus::Success:
             break;
@@ -232,10 +217,9 @@ BleSerial::flush(
 /// \ref https://msdn.microsoft.com/en-us/library/aa965711(VS.85).aspx
 /// \warning Must be called from UI thread
 Windows::Foundation::IAsyncOperation<Windows::Devices::Enumeration::DeviceInformationCollection ^> ^
-BleSerial::listAvailableDevicesAsync(
+BleSerial::listAvailableDevicesAsync (
     void
-    )
-{
+) {
     // Construct AQS String for Bluetooth LE devices
     Platform::String ^device_aqs = Windows::Devices::Bluetooth::BluetoothLEDevice::GetDeviceSelector();
 
@@ -244,53 +228,49 @@ BleSerial::listAvailableDevicesAsync(
 }
 
 void
-BleSerial::lock(
+BleSerial::lock (
     void
-    )
-{
+) {
     _ble_lock.lock();
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     uint8_t c_
-    )
-{
+) {
     return write(c_);
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     int32_t value_
-    )
-{
+) {
     return print(value_, Radix::DEC);
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     int32_t value_,
     Radix base_
-    )
-{
+) {
     constexpr int bit_size = (sizeof(int) * 8);
     std::bitset<bit_size> bits(value_);
     char text_value[bit_size + 1];
 
     switch (base_) {
-    case Radix::BIN:
+      case Radix::BIN:
         sprintf_s(text_value, "%s", bits.to_string().c_str());
         break;
-    case Radix::DEC:
+      case Radix::DEC:
         sprintf_s(text_value, "%i", value_);
         break;
-    case Radix::HEX:
+      case Radix::HEX:
         sprintf_s(text_value, "%x", value_);
         break;
-    case Radix::OCT:
+      case Radix::OCT:
         sprintf_s(text_value, "%o", value_);
         break;
-    default:
+      default:
         return static_cast<uint16_t>(-1);
     }
 
@@ -298,37 +278,35 @@ BleSerial::print(
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     uint32_t value_
-    )
-{
+) {
     return print(value_, Radix::DEC);
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     uint32_t value_,
     Radix base_
-    )
-{
+) {
     constexpr int bit_size = (sizeof(unsigned int) * 8);
     std::bitset<bit_size> bits(value_);
     char text_value[bit_size + 1];
 
     switch (base_) {
-    case Radix::BIN:
+      case Radix::BIN:
         sprintf_s(text_value, "%s", bits.to_string().c_str());
         break;
-    case Radix::DEC:
+      case Radix::DEC:
         sprintf_s(text_value, "%u", value_);
         break;
-    case Radix::HEX:
+      case Radix::HEX:
         sprintf_s(text_value, "%x", value_);
         break;
-    case Radix::OCT:
+      case Radix::OCT:
         sprintf_s(text_value, "%o", value_);
         break;
-    default:
+      default:
         return static_cast<uint16_t>(-1);
     }
 
@@ -336,19 +314,17 @@ BleSerial::print(
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     double value_
-    )
-{
+) {
     return print(value_, 2);
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     double value_,
     int16_t decimal_places_
-    )
-{
+) {
     constexpr int max_double_size = (sizeof(double) * 8);
     constexpr int max_int_size = (sizeof(int16_t) * 8);
     char format_string[max_int_size + 5];
@@ -361,18 +337,16 @@ BleSerial::print(
 }
 
 uint16_t
-BleSerial::print(
+BleSerial::print (
     const Platform::Array<uint8_t> ^buffer_
-    )
-{
+) {
     return write(buffer_);
 }
 
 uint16_t
-BleSerial::read(
+BleSerial::read (
     void
-    )
-{
+) {
     uint16_t c = static_cast<uint16_t>(-1);
 
     if (available()) {
@@ -385,18 +359,16 @@ BleSerial::read(
 }
 
 void
-BleSerial::unlock(
+BleSerial::unlock (
     void
-    )
-{
+) {
     _ble_lock.unlock();
 }
 
 uint16_t
-BleSerial::write(
+BleSerial::write (
     uint8_t c_
-    )
-{
+) {
     // Check to see if connection is ready
     if (!connectionReady()) { return 0; }
 
@@ -405,10 +377,9 @@ BleSerial::write(
 }
 
 uint16_t
-BleSerial::write(
+BleSerial::write (
     const Platform::Array<uint8_t> ^buffer_
-    )
-{
+) {
     // Check to see if connection is ready
     if (!connectionReady()) { return 0; }
 
@@ -421,14 +392,12 @@ BleSerial::write(
 //******************************************************************************
 
 Concurrency::task<void>
-BleSerial::connectToDeviceAsync(
+BleSerial::connectToDeviceAsync (
     Windows::Devices::Enumeration::DeviceInformation ^device_
-    )
-{
+) {
     _device_name = device_->Name;  // Update name in case device was specified directly
     return Concurrency::create_task(Windows::Devices::Bluetooth::BluetoothLEDevice::FromIdAsync(device_->Id))
-        .then([this](Windows::Devices::Bluetooth::BluetoothLEDevice ^gatt_device_)
-    {
+    .then([this](Windows::Devices::Bluetooth::BluetoothLEDevice ^gatt_device_) {
         if( gatt_device_ == nullptr )
         {
             throw ref new Platform::Exception( E_UNEXPECTED, ref new Platform::String( L"Unable to initialize the device. BluetoothLEDevice::FromIdAsync returned null." ) );
@@ -454,16 +423,11 @@ BleSerial::connectToDeviceAsync(
 }
 
 Windows::Devices::Enumeration::DeviceInformation ^
-BleSerial::identifyDeviceFromCollection(
+BleSerial::identifyDeviceFromCollection (
     Windows::Devices::Enumeration::DeviceInformationCollection ^devices_
-    )
-{
-    for(auto &&device : devices_)
-    {
-        if (device->Id->Equals(_device_name) || device->Name->Equals(_device_name))
-        {
-            return device;
-        }
+) {
+    for(auto &&device : devices_) {
+        if (device->Id->Equals(_device_name) || device->Name->Equals(_device_name)) { return device; }
     }
 
     // If we searched and found nothing that matches the identifier, we've failed to connect and cannot recover.
@@ -471,11 +435,10 @@ BleSerial::identifyDeviceFromCollection(
 }
 
 void
-BleSerial::rxCallback(
+BleSerial::rxCallback (
     GattCharacteristic ^sender,
     GattValueChangedEventArgs ^args
-    )
-{
+) {
     // Extract data into workable form from parameters
     Platform::Array<byte> ^rx_data = ref new Platform::Array<byte>(args->CharacteristicValue->Length);
     DataReader::FromBuffer(args->CharacteristicValue)->ReadBytes(rx_data);

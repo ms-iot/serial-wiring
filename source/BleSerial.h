@@ -33,7 +33,7 @@ namespace Serial {
 
 public ref class BleSerial sealed : public IStream
 {
-public:
+  public:
     virtual event IStreamConnectionCallback ^ConnectionEstablished;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
@@ -41,7 +41,7 @@ public:
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
-    BleSerial(
+    BleSerial (
         Platform::String ^device_name_,
         Platform::Guid BLE_SERVICE_UUID,
         Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
@@ -52,7 +52,7 @@ public:
     ///A constructor which accepts a DeviceInformation object to explicitly specify which device to connect to.
     ///</summary>
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    BleSerial(
+    BleSerial (
         Windows::Devices::Enumeration::DeviceInformation ^device_,
         Platform::Guid BLE_SERVICE_UUID,
         Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID,
@@ -60,146 +60,145 @@ public:
     );
 
     virtual
-    ~BleSerial(
+    ~BleSerial (
         void
-        );
+    );
 
     virtual
     uint16_t
-    available(
+    available (
         void
-        );
+    );
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     inline
     void
-    begin(
+    begin (
         void
-        )
-    {
+    ) {
         //baud rate and serial configuration are unnecessary for BLE connections as we are not using asyncronous TTL
         begin( NULL, SerialConfig::NONE );
     }
 
     virtual
     void
-    begin(
+    begin (
         uint32_t baud_,
         SerialConfig config_
-        );
+    );
 
     virtual
     bool
-    connectionReady(
+    connectionReady (
         void
-        );
+    );
 
     virtual
     void
-    end(
+    end (
         void
-        );
+    );
 
     virtual
     void
-    flush(
+    flush (
         void
-        );
+    );
 
     virtual
     void
-    lock(
+    lock (
         void
-        );
+    );
 
     virtual
     uint16_t
-    print(
-          uint8_t c_
-         );
-
-    virtual
-    uint16_t
-    print(
-          int32_t value_
-         );
-
-    virtual
-    uint16_t
-    print(
-          int32_t value_,
-          Radix base_
-         );
-
-    virtual
-    uint16_t
-    print(
-          uint32_t value_
-         );
-
-    virtual
-    uint16_t
-    print(
-          uint32_t value_,
-          Radix base_
-         );
-
-    virtual
-    uint16_t
-    print(
-          double value_
-         );
-
-    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    virtual
-    uint16_t
-    print(
-          double value_,
-          int16_t decimal_place_
-         );
-
-    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    virtual
-    uint16_t
-    print(
-        const Platform::Array<uint8_t> ^buffer_
-        );
-
-    virtual
-    uint16_t
-    read(
-        void
-        );
-
-    virtual
-    void
-    unlock(
-        void
-        );
-
-    virtual
-    uint16_t
-    write(
+    print (
         uint8_t c_
-        );
+    );
+
+    virtual
+    uint16_t
+    print (
+        int32_t value_
+    );
+
+    virtual
+    uint16_t
+    print (
+        int32_t value_,
+        Radix base_
+    );
+
+    virtual
+    uint16_t
+    print (
+        uint32_t value_
+    );
+
+    virtual
+    uint16_t
+    print (
+        uint32_t value_,
+        Radix base_
+    );
+
+    virtual
+    uint16_t
+    print (
+        double value_
+    );
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     virtual
     uint16_t
-    write(
+    print (
+        double value_,
+        int16_t decimal_place_
+    );
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual
+    uint16_t
+    print (
         const Platform::Array<uint8_t> ^buffer_
-        );
+    );
+
+    virtual
+    uint16_t
+    read (
+        void
+    );
+
+    virtual
+    void
+    unlock (
+        void
+    );
+
+    virtual
+    uint16_t
+    write (
+        uint8_t c_
+    );
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual
+    uint16_t
+    write (
+        const Platform::Array<uint8_t> ^buffer_
+    );
 
     ///<summary>
     ///Begins an asyncronous request for all Bluetooth LE devices that are paired and may be used to attempt a device connection.
     ///</summary>
     static
     Windows::Foundation::IAsyncOperation<Windows::Devices::Enumeration::DeviceInformationCollection ^> ^
-    listAvailableDevicesAsync(
+    listAvailableDevicesAsync (
         void
-        );
+    );
 
-private:
+  private:
     const Platform::Guid BLE_SERVICE_UUID;
     const Platform::Guid BLE_SERIAL_RX_CHARACTERISTIC_UUID;
     const Platform::Guid BLE_SERIAL_TX_CHARACTERISTIC_UUID;
@@ -225,18 +224,18 @@ private:
     Concurrency::task<void>
     connectToDeviceAsync(
         Windows::Devices::Enumeration::DeviceInformation ^device_
-        );
+    );
 
     Windows::Devices::Enumeration::DeviceInformation ^
     identifyDeviceFromCollection(
         Windows::Devices::Enumeration::DeviceInformationCollection ^devices_
-        );
+    );
 
     void
     rxCallback(
         Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic ^sender,
         Windows::Devices::Bluetooth::GenericAttributeProfile::GattValueChangedEventArgs ^args
-        );
+    );
 };
 
 } // namespace Serial
