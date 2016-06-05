@@ -460,6 +460,11 @@ UsbSerial::connectToDeviceAsync(
         _serial_device->BaudRate = _baud;
         _serial_device->IsDataTerminalReadyEnabled = true;
 
+		// Fix for delayed serial response
+		Windows::Foundation::TimeSpan readTimeoutSpan;
+		readTimeoutSpan.Duration = 30000L;
+		_serial_device->ReadTimeout = readTimeoutSpan;
+
         switch (_config) {
         case SerialConfig::SERIAL_5E1:
             _serial_device->DataBits = 5;
