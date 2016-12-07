@@ -25,8 +25,6 @@
 #pragma once
 #include "IStream.h"
 #include "BleSerial.h"
-#include <mutex>
-#include <queue>
 
 namespace Microsoft {
 namespace Maker {
@@ -34,7 +32,7 @@ namespace Serial {
 
 public ref class CurieBleSerial sealed : public IStream
 {
-public:
+  public:
     virtual event IStreamConnectionCallback ^ConnectionEstablished;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionLost;
     virtual event IStreamConnectionCallbackWithMessage ^ConnectionFailed;
@@ -42,280 +40,240 @@ public:
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
-    CurieBleSerial(
+    CurieBleSerial (
         Platform::String ^device_name_
     ) :
         _bleSerial(ref new BleSerial(
             device_name_,
-            Platform::Guid(0x6E400001, 0xB5A3, 0xF393, 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E),
-            Platform::Guid(0x6E400003, 0xB5A3, 0xF393, 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E),
-            Platform::Guid(0x6E400002, 0xB5A3, 0xF393, 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E)
+            Platform::Guid(0x6e400001, 0xb5a3, 0xf393, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e),
+            Platform::Guid(0x6e400003, 0xb5a3, 0xf393, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e),
+            Platform::Guid(0x6e400002, 0xb5a3, 0xf393, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e)
         ))
-    {
-    };
+    { }
 
     ///<summary>
     ///A constructor which accepts a DeviceInformation object to explicitly specify which device to connect to.
     ///</summary>
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    CurieBleSerial(
+    CurieBleSerial (
         Windows::Devices::Enumeration::DeviceInformation ^device_
-        ) :
+    ) :
         _bleSerial(ref new BleSerial(
             device_,
-            Platform::Guid(0x6E400001, 0xB5A3, 0xF393, 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E),
-            Platform::Guid(0x6E400003, 0xB5A3, 0xF393, 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E),
-            Platform::Guid(0x6E400002, 0xB5A3, 0xF393, 0xE0, 0xA9, 0xE5, 0x0E, 0x24, 0xDC, 0xCA, 0x9E)
+            Platform::Guid(0x6e400001, 0xb5a3, 0xf393, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e),
+            Platform::Guid(0x6e400003, 0xb5a3, 0xf393, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e),
+            Platform::Guid(0x6e400002, 0xb5a3, 0xf393, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e)
         ))
-    {
-    };
+    { }
 
-    virtual
-    inline
-        ~CurieBleSerial(
-            void
-        )
-    {
+    virtual inline
+    ~CurieBleSerial (
+        void
+    ) {
         _bleSerial->~BleSerial();
-    };
+    }
 
-    virtual
-	inline
+    virtual inline
     uint16_t
-        available(
-            void
-        )
-    {
+    available (
+        void
+    ) {
         return _bleSerial->available();
-    };
+    }
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
     inline
     void
-    begin(
+    begin (
         void
-        )
-    {
+    ) {
         //baud rate and serial configuration are unnecessary for BLE connections as we are not using asyncronous TTL
         begin(NULL, SerialConfig::NONE);
     }
     
-    inline
-    virtual
+    virtual inline
     void
-        begin(
-            uint32_t baud_,
-            SerialConfig config_
-        )
-    {
+    begin (
+        uint32_t baud_,
+        SerialConfig config_
+    ) {
         _bleSerial->ConnectionEstablished += ref new IStreamConnectionCallback(this, &CurieBleSerial::OnConnectionEstablished);
         _bleSerial->ConnectionLost += ref new IStreamConnectionCallbackWithMessage(this, &CurieBleSerial::OnConnectionLost);
         _bleSerial->ConnectionFailed += ref new IStreamConnectionCallbackWithMessage(this, &CurieBleSerial::OnConnectionFailed);
         _bleSerial->begin(baud_, config_);
-    };
+    }
 
-    virtual
-	inline
+    virtual inline
     bool
-        connectionReady(
-            void
-        )
-    {
+    connectionReady (
+        void
+    ) {
         return _bleSerial->connectionReady();
-    };
+    }
 
-    virtual
-	inline
+    virtual inline
     void
-        end(
-            void
-        )
-    {
+    end (
+        void
+    ) {
         _bleSerial->end();
-    };
+    }
 
-    virtual
-	inline
+    virtual inline
     void
-        flush(
-            void
-        )
-    {
+    flush (
+        void
+    ) {
         _bleSerial->flush();
-    };
+    }
 
-    virtual
-	inline
+    virtual inline
     void
-        lock(
-            void
-        )
-    {
+    lock (
+        void
+    ) {
         _bleSerial->lock();
-    };
+    }
 
-    virtual
-	inline
+    virtual inline
     uint16_t
-        print(
-            uint8_t c_
-        )
-    {
-        return _bleSerial->print(c_);
-    };
-
-    virtual
-	inline
-    uint16_t
-    print(
-          int32_t value_
-         )
-    {
-        return _bleSerial->print(value_);
-    };
-
-    virtual
-	inline
-    uint16_t
-    print(
-          int32_t value_,
-          Radix base_
-         )
-    {
-        return _bleSerial->print(value_, base_);
-    };
-
-    virtual
-	inline
-    uint16_t
-    print(
-          uint32_t value_
-         )
-    {
-        return _bleSerial->print(value_);
-    };
-
-    virtual
-	inline
-    uint16_t
-    print(
-          uint32_t value_,
-          Radix base_
-         )
-    {
-        return _bleSerial->print(value_, base_);
-    };
-
-    virtual
-	inline
-    uint16_t
-    print(
-          double value_
-         )
-    {
-        return _bleSerial->print(value_);
-    };
-
-    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    virtual
-	inline
-    uint16_t
-    print(
-          double value_,
-          int16_t decimal_place_
-         )
-    {
-        return _bleSerial->print(value_, decimal_place_);
-    };
-
-    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    virtual
-	inline
-    uint16_t
-    print(
-        const Platform::Array<uint8_t> ^buffer_
-        )
-    {
-        return _bleSerial->print(buffer_);
-    };
-
-    virtual
-	inline
-    uint16_t
-        read(
-            void
-        )
-    {
-        return _bleSerial->read();
-    };
-
-    virtual
-	inline
-    void
-        unlock(
-            void
-        )
-    {
-        _bleSerial->unlock();
-    };
-
-    virtual
-	inline
-    uint16_t
-    write(
+    print (
         uint8_t c_
-        )
-    {
-        return _bleSerial->write(c_);
-    };
+    ) {
+        return _bleSerial->print(c_);
+    }
+
+    virtual inline
+    uint16_t
+    print (
+        int32_t value_
+    ) {
+        return _bleSerial->print(value_);
+    }
+
+    virtual inline
+    uint16_t
+    print (
+        int32_t value_,
+        Radix base_
+    ) {
+        return _bleSerial->print(value_, base_);
+    }
+
+    virtual inline
+    uint16_t
+    print (
+        uint32_t value_
+    ) {
+        return _bleSerial->print(value_);
+    }
+
+    virtual inline
+    uint16_t
+    print (
+        uint32_t value_,
+        Radix base_
+    ) {
+        return _bleSerial->print(value_, base_);
+    }
+
+    virtual inline
+    uint16_t
+    print (
+        double value_
+    ) {
+        return _bleSerial->print(value_);
+    }
 
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    virtual
-	inline
+    virtual inline
     uint16_t
-    write(
+    print (
+        double value_,
+        int16_t decimal_place_
+    ) {
+        return _bleSerial->print(value_, decimal_place_);
+    }
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual inline
+    uint16_t
+    print (
         const Platform::Array<uint8_t> ^buffer_
-        )
-    {
+    ) {
+        return _bleSerial->print(buffer_);
+    }
+
+    virtual inline
+    uint16_t
+    read (
+        void
+    ) {
+        return _bleSerial->read();
+    }
+
+    virtual inline
+    void
+    unlock (
+        void
+    ) {
+        _bleSerial->unlock();
+    }
+
+    virtual inline
+    uint16_t
+    write (
+        uint8_t c_
+    ) {
+        return _bleSerial->write(c_);
+    }
+
+    [Windows::Foundation::Metadata::DefaultOverloadAttribute]
+    virtual inline
+    uint16_t
+    write (
+        const Platform::Array<uint8_t> ^buffer_
+    ) {
         return _bleSerial->write(buffer_);
-    };
+    }
 
     ///<summary>
     ///Begins an asyncronous request for all Bluetooth LE devices that are paired and may be used to attempt a device connection.
     ///</summary>
-    inline
-    static
+    static inline
     Windows::Foundation::IAsyncOperation<Windows::Devices::Enumeration::DeviceInformationCollection ^> ^
-    listAvailableDevicesAsync(
+    listAvailableDevicesAsync (
         void
-        )
-    {
+    ) {
         return BleSerial::listAvailableDevicesAsync();
-    };
+    }
 
-private:
+  private:
     BleSerial ^ const _bleSerial;
 
     inline
     void
-        OnConnectionEstablished()
-    {
+    OnConnectionEstablished (
+        void
+    ) {
         ConnectionEstablished();
-    };
+    }
 
     inline
     void
-        OnConnectionLost(Platform::String ^message)
-    {
+    OnConnectionLost (
+        Platform::String ^message
+    ) {
         ConnectionLost(message);
-    };
+    }
 
     inline
     void
-    OnConnectionFailed(Platform::String ^message)
-    {
+    OnConnectionFailed (
+        Platform::String ^message
+    ) {
         ConnectionFailed(message);
-    };
+    }
 };
 
 } // namespace Serial

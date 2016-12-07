@@ -30,7 +30,7 @@ namespace Microsoft {
 namespace Maker {
 namespace Serial {
 
-public ref class DfRobotBleSerial sealed : public IStream
+public ref class RedBearLabBleSerial sealed : public IStream
 {
   public:
     virtual event IStreamConnectionCallback ^ConnectionEstablished;
@@ -40,34 +40,34 @@ public ref class DfRobotBleSerial sealed : public IStream
     ///<summary>
     ///A constructor which accepts a string corresponding to a device name or ID to connect to.
     ///</summary>
-    DfRobotBleSerial (
+    RedBearLabBleSerial (
         Platform::String ^device_name_
     ) :
         _bleSerial(ref new BleSerial(
             device_name_,
-            Platform::Guid(0x0000dfb0, 0x0000, 0x1000, 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb),
-            Platform::Guid(0x0000dfb1, 0x0000, 0x1000, 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb),
-            Platform::Guid(0x0000dfb1, 0x0000, 0x1000, 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb)
-        ))
-    { }
+            Platform::Guid(0x713d0000, 0x503e, 0x4c75, 0xba, 0x94, 0x31, 0x48, 0xf1, 0x8d, 0x94, 0x1e),
+            Platform::Guid(0x713d0002, 0x503e, 0x4c75, 0xba, 0x94, 0x31, 0x48, 0xf1, 0x8d, 0x94, 0x1e),
+            Platform::Guid(0x713d0003, 0x503e, 0x4c75, 0xba, 0x94, 0x31, 0x48, 0xf1, 0x8d, 0x94, 0x1e)
+            ))
+    {}
 
     ///<summary>
     ///A constructor which accepts a DeviceInformation object to explicitly specify which device to connect to.
     ///</summary>
     [Windows::Foundation::Metadata::DefaultOverloadAttribute]
-    DfRobotBleSerial (
+    RedBearLabBleSerial (
         Windows::Devices::Enumeration::DeviceInformation ^device_
     ) :
         _bleSerial(ref new BleSerial(
             device_,
-            Platform::Guid(0x0000dfb0, 0x0000, 0x1000, 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb),
-            Platform::Guid(0x0000dfb1, 0x0000, 0x1000, 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb),
-            Platform::Guid(0x0000dfb1, 0x0000, 0x1000, 0x80, 0x00, 0x00, 0x80, 0x5f, 0x9b, 0x34, 0xfb)
+            Platform::Guid(0x713d0000, 0x503e, 0x4c75, 0xba, 0x94, 0x31, 0x48, 0xf1, 0x8d, 0x94, 0x1e),
+            Platform::Guid(0x713d0002, 0x503e, 0x4c75, 0xba, 0x94, 0x31, 0x48, 0xf1, 0x8d, 0x94, 0x1e),
+            Platform::Guid(0x713d0003, 0x503e, 0x4c75, 0xba, 0x94, 0x31, 0x48, 0xf1, 0x8d, 0x94, 0x1e)
         ))
-    { }
+    {}
 
     virtual inline
-    ~DfRobotBleSerial (
+    ~RedBearLabBleSerial (
         void
     ) {
         _bleSerial->~BleSerial();
@@ -97,9 +97,9 @@ public ref class DfRobotBleSerial sealed : public IStream
         uint32_t baud_,
         SerialConfig config_
     ) {
-        _bleSerial->ConnectionEstablished += ref new IStreamConnectionCallback(this, &DfRobotBleSerial::OnConnectionEstablished);
-        _bleSerial->ConnectionLost += ref new IStreamConnectionCallbackWithMessage(this, &DfRobotBleSerial::OnConnectionLost);
-        _bleSerial->ConnectionFailed += ref new IStreamConnectionCallbackWithMessage(this, &DfRobotBleSerial::OnConnectionFailed);
+        _bleSerial->ConnectionEstablished += ref new IStreamConnectionCallback(this, &RedBearLabBleSerial::OnConnectionEstablished);
+        _bleSerial->ConnectionLost += ref new IStreamConnectionCallbackWithMessage(this, &RedBearLabBleSerial::OnConnectionLost);
+        _bleSerial->ConnectionFailed += ref new IStreamConnectionCallbackWithMessage(this, &RedBearLabBleSerial::OnConnectionFailed);
         _bleSerial->begin(baud_, config_);
     }
 

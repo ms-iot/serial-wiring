@@ -14,6 +14,7 @@
     <ClCompile Include="..\source\BleSerial.cpp" />
     <ClCompile Include="..\source\DfRobotBleSerial.cpp" />
     <ClCompile Include="..\source\CurieBleSerial.cpp" />
+    <ClCompile Include="..\source\RedBearLabBleSerial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -24,5 +25,6 @@
     <ClInclude Include="..\source\USBSerial.h" />
     <ClInclude Include="..\source\BleSerial.h" />
     <ClInclude Include="..\source\CurieBleSerial.h" />
+    <ClInclude Include="..\source\RedBearLabBleSerial.h" />
   </ItemGroup>
 </Project>
