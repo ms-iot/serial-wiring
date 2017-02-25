@@ -165,6 +165,12 @@ public:
         );
 
     virtual
+    uint16_t
+    readBlocking(
+        void
+        );
+
+    virtual
     void
     unlock(
         void
