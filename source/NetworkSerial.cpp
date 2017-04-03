@@ -93,7 +93,7 @@ NetworkSerial::available(
 		if (_current_load_operation->Status == Windows::Foundation::AsyncStatus::Error)
 		{
 			_connection_ready = false;
-			ConnectionLost(L"A fatal error has occurred in UsbSerial::read() and your connection has been lost.");
+			ConnectionLost(L"A fatal error has occurred in NetworkSerial::available() and your connection has been lost.");
 			return 0;
 		}
 
@@ -336,6 +336,35 @@ NetworkSerial::read(
 	}
 
 	return c;
+}
+
+uint16_t
+NetworkSerial::readBlocking(
+    void
+)
+{
+    uint16_t c = static_cast<uint16_t>(-1);
+
+    if (!_rx->UnconsumedBufferLength)
+    {
+        if (_current_load_operation->Status != Windows::Foundation::AsyncStatus::Started)
+        {
+            _current_load_operation = _rx->LoadAsync(MAX_READ_SIZE);
+        }
+
+        create_task(_current_load_operation).wait();
+
+        if (_current_load_operation->Status == Windows::Foundation::AsyncStatus::Error)
+        {
+            _connection_ready = false;
+            ConnectionLost(L"A fatal error has occurred in NetworkSerial::readBlocking() and your connection has been lost.");
+            return c;
+        }
+    }
+
+    c = _rx->ReadByte();
+
+    return c;
 }
 
 void

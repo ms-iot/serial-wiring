@@ -213,6 +213,14 @@ public ref class RedBearLabBleSerial sealed : public IStream
     }
 
     virtual inline
+    uint16_t
+    readBlocking (
+        void
+    ) {
+        return _bleSerial->readBlocking();
+    }
+
+    virtual inline
     void
     unlock (
         void

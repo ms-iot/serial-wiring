@@ -132,7 +132,7 @@ UsbSerial::available(
 		if (_current_load_operation->Status == Windows::Foundation::AsyncStatus::Error)
 		{
 			_connection_ready = false;
-			ConnectionLost(L"A fatal error has occurred in UsbSerial::read() and your connection has been lost.");
+			ConnectionLost(L"A fatal error has occurred in UsbSerial::available() and your connection has been lost.");
 			return 0;
 		}
 
@@ -392,13 +392,42 @@ UsbSerial::print(
 uint16_t
 UsbSerial::read(
     void
-    )
+)
 {
     uint16_t c = static_cast<uint16_t>(-1);
 
-    if ( available() ) {
+    if (available()) {
         c = _rx->ReadByte();
     }
+
+    return c;
+}
+
+uint16_t
+UsbSerial::readBlocking(
+    void
+)
+{
+    uint16_t c = static_cast<uint16_t>(-1);
+
+    if (!_rx->UnconsumedBufferLength)
+    {
+        if (_current_load_operation->Status != Windows::Foundation::AsyncStatus::Started)
+        {
+            _current_load_operation = _rx->LoadAsync(MAX_READ_SIZE);
+        }
+
+        create_task(_current_load_operation).wait();
+
+        if (_current_load_operation->Status == Windows::Foundation::AsyncStatus::Error)
+        {
+            _connection_ready = false;
+            ConnectionLost(L"A fatal error has occurred in UsbSerial::readBlocking() and your connection has been lost.");
+            return c;
+        }
+    }
+
+    c = _rx->ReadByte();
 
     return c;
 }

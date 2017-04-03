@@ -358,6 +358,21 @@ BleSerial::read (
     return c;
 }
 
+uint16_t
+BleSerial::readBlocking(
+    void
+) {
+    uint16_t c = static_cast<uint16_t>(-1);
+
+    if (available()) {
+        std::lock_guard<std::mutex> lock(_q_lock);
+        c = _rx.front();
+        _rx.pop();
+    }
+
+    return c;
+}
+
 void
 BleSerial::unlock (
     void

@@ -228,6 +228,15 @@ public interface struct IStream
         ) = 0;
 
     ///<summary>
+    ///Attempts to read one byte once bytes are available
+    ///</summary>
+    virtual
+    uint16_t
+    readBlocking(
+        void
+        ) = 0;
+
+    ///<summary>
     ///Places one byte into the outbound queue. Data will not be sent until `flush()` is called explicitly.
     ///</summary>
     virtual
